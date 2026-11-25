@@ -1,0 +1,151 @@
+rules_version = '2';
+
+// =====================================================================
+//  CampusLink — правила доступа к Firestore
+//  Всё, что не разрешено явно ниже, ЗАПРЕЩЕНО (в том числе старые hw_*).
+// =====================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Вспомогательные функции ----------
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Админ = есть документ u_admins/{ваш uid}. Создаётся вручную в консоли.
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/u_admins/$(request.auth.uid));
+    }
+
+    function myProfilePath() { return /databases/$(database)/documents/u_profiles/$(request.auth.uid); }
+
+    // Пользователь с анкетой и без бана
+    function activeUser() {
+      return signedIn() && exists(myProfilePath()) && get(myProfilePath()).data.banned == false;
+    }
+
+    function likePath(a, b) { return /databases/$(database)/documents/u_likes/$(a + '_' + b); }
+    function liked(a, b) { return exists(likePath(a, b)) && get(likePath(a, b)).data.type == 'like'; }
+
+    // Взаимная симпатия между мной и other
+    function isMatch(other) {
+      return signedIn() && liked(request.auth.uid, other) && liked(other, request.auth.uid);
+    }
+
+    function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+
+    function profileKeys() {
+      return ['uid','name','age','gender','lookingFor','faculty','course','group',
+              'goals','skills','bio','photo','banned','createdAt','updatedAt'];
+    }
+
+    function validProfile(d, uid) {
+      return d.keys().hasOnly(profileKeys()) && d.keys().hasAll(profileKeys())
+        && d.uid == uid
+        && str(d.name, 1, 30)
+        && d.age is int && d.age >= 18 && d.age <= 60
+        && d.gender in ['m', 'f']
+        && d.lookingFor in ['m', 'f', 'any']
+        && str(d.faculty, 1, 60) && str(d.course, 1, 20) && str(d.group, 1, 20)
+        && d.goals is list && d.goals.size() >= 1 && d.goals.size() <= 4
+        && d.goals.hasOnly(['love', 'friends', 'study', 'team'])
+        && d.skills is list && d.skills.size() <= 10
+        && str(d.bio, 0, 200)
+        // Фото: только JPEG в base64. Это закрывает подстановку скриптов через поле фото.
+        && str(d.photo, 30, 400000) && d.photo.matches('data:image/jpeg;base64,[A-Za-z0-9+/=]+')
+        && d.banned is bool
+        && d.createdAt is int && d.updatedAt is int;
+    }
+
+    // ---------- Анкеты (без контактов) ----------
+    match /u_profiles/{uid} {
+      allow read: if signedIn();
+
+      allow create: if isOwner(uid)
+        && validProfile(request.resource.data, uid)
+        && request.resource.data.banned == false;
+
+      // Владелец меняет свою анкету, но не может снять с себя бан.
+      // Админ может менять только banned и updatedAt.
+      allow update: if (isOwner(uid)
+          && validProfile(request.resource.data, uid)
+          && request.resource.data.banned == resource.data.banned
+          && request.resource.data.createdAt == resource.data.createdAt)
+        || (isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['banned', 'updatedAt']));
+
+      // Забаненный не может удалить анкету и зарегистрироваться заново.
+      allow delete: if (isOwner(uid) && resource.data.banned == false) || isAdmin();
+    }
+
+    // ---------- Контакты: только владелец, админ или взаимный мэтч ----------
+    match /u_private/{uid} {
+      allow read: if isOwner(uid) || isAdmin() || isMatch(uid);
+
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['telegram', 'instagram'])
+        && str(request.resource.data.telegram, 0, 40)
+        && str(request.resource.data.instagram, 0, 40)
+        && (request.resource.data.telegram.size() > 0 || request.resource.data.instagram.size() > 0);
+
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // ---------- Лайки и пропуски: id документа = "отКого_кому" ----------
+    match /u_likes/{id} {
+      allow read: if signedIn() && (
+        resource.data.fromUid == request.auth.uid
+        || resource.data.toUid == request.auth.uid
+        || isAdmin());
+
+      allow create, update: if activeUser()
+        && request.resource.data.keys().hasOnly(['fromUid', 'toUid', 'type', 'message', 'ts'])
+        && request.resource.data.fromUid == request.auth.uid
+        && request.resource.data.toUid is string
+        && request.resource.data.toUid != request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.toUid
+        && request.resource.data.type in ['like', 'skip']
+        && str(request.resource.data.message, 0, 200)
+        && request.resource.data.ts is int;
+
+      // Удалить может отправитель (отмена свайпа), получатель (удаление аккаунта) или админ.
+      allow delete: if signedIn() && (
+        resource.data.fromUid == request.auth.uid
+        || resource.data.toUid == request.auth.uid
+        || isAdmin());
+    }
+
+    // ---------- Доска «Ищу команду» ----------
+    match /u_posts/{postId} {
+      allow read: if signedIn();
+
+      allow create: if activeUser()
+        && request.resource.data.keys().hasOnly(['authorUid', 'kind', 'title', 'text', 'skills', 'createdAt'])
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.kind in ['hackathon', 'project', 'study']
+        && str(request.resource.data.title, 3, 70)
+        && str(request.resource.data.text, 0, 500)
+        && request.resource.data.skills is list && request.resource.data.skills.size() <= 8
+        && request.resource.data.createdAt is int;
+
+      allow delete: if signedIn() && (resource.data.authorUid == request.auth.uid || isAdmin());
+    }
+
+    // ---------- Жалобы: пишет любой активный, читает только админ ----------
+    match /u_reports/{reportId} {
+      allow create: if activeUser()
+        && request.resource.data.keys().hasOnly(['fromUid', 'targetUid', 'reason', 'ts'])
+        && request.resource.data.fromUid == request.auth.uid
+        && request.resource.data.targetUid is string
+        && str(request.resource.data.reason, 1, 300)
+        && request.resource.data.ts is int;
+
+      allow read, delete: if isAdmin();
+    }
+
+    // ---------- Список админов: свою запись видит только сам админ ----------
+    match /u_admins/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+  }
+}
