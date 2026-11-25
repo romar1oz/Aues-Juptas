@@ -1,4 +1,4 @@
-# CampusLink
+# JUPTAS
 
 Знакомства и нетворкинг студентов · Студенттердің танысуы мен нетворкингі · Student dating & networking
 
