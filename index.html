@@ -335,8 +335,8 @@
         font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: 0.06em;
         opacity: 0; pointer-events: none; background: rgba(0, 0, 0, 0.35);
       }
-      .stamp-like { left: 18px; color: #7ff0bf; border-color: #7ff0bf; transform: rotate(-12deg); }
-      .stamp-skip { right: 18px; color: #ff9aa8; border-color: #ff9aa8; transform: rotate(12deg); }
+      .stamp-like { right: 18px; color: #7ff0bf; border-color: #7ff0bf; transform: rotate(12deg); }
+      .stamp-skip { left: 18px; color: #ff9aa8; border-color: #ff9aa8; transform: rotate(-12deg); }
 
       .swipe-actions { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 12px 0 4px; flex-shrink: 0; }
       .round { border-radius: 50%; display: grid; place-items: center; transition: transform 0.15s, opacity 0.2s; }
@@ -989,8 +989,8 @@
           "btn.resetFilters": "Сбросить фильтры",
           "feed.again": "снова",
           "feed.allTitle": "Вы посмотрели всех",
-          "feed.allText": "Вы лайкнули всех, кто подходит. Новые анкеты появятся здесь автоматически.",
-          "btn.restore": "Вернуть пропущенных",
+          "feed.allText": "Вы просмотрели всех. Можно снова показать тех, кого вы пропустили.",
+          "btn.restore": "↻ Показать снова",
           "card.ban": "Бан", "tip.report": "Пожаловаться", "stamp.like": "ЛАЙК", "stamp.skip": "ПРОПУСК",
           "toast.msgSent": "Сообщение отправлено 💌", "toast.undone": "Последний свайп отменён",
           "toast.noSkips": "Пропущенных нет", "toast.restored": "Вернули анкет: {n}",
@@ -1150,8 +1150,8 @@
           "btn.resetFilters": "Сүзгілерді тазарту",
           "feed.again": "қайта",
           "feed.allTitle": "Барлығын қарап шықтыңыз",
-          "feed.allText": "Сізге сай барлығына лайк бастыңыз. Жаңа анкеталар осында автоматты түрде пайда болады.",
-          "btn.restore": "Өткізілгендерді қайтару",
+          "feed.allText": "Барлығын қарап шықтыңыз. Өткізіп жібергендерді қайта көруге болады.",
+          "btn.restore": "↻ Қайта көру",
           "card.ban": "Бан", "tip.report": "Шағымдану", "stamp.like": "ЛАЙК", "stamp.skip": "ӨТКІЗУ",
           "toast.msgSent": "Хабарлама жіберілді 💌", "toast.undone": "Соңғы свайп болдырылмады",
           "toast.noSkips": "Өткізілген анкета жоқ", "toast.restored": "Қайтарылған анкеталар: {n}",
@@ -1311,8 +1311,8 @@
           "btn.resetFilters": "Reset filters",
           "feed.again": "again",
           "feed.allTitle": "You've seen everyone",
-          "feed.allText": "You've liked everyone who fits. New profiles will show up here automatically.",
-          "btn.restore": "Bring back skipped",
+          "feed.allText": "You've seen everyone. You can show the people you skipped again.",
+          "btn.restore": "↻ View again",
           "card.ban": "Ban", "tip.report": "Report", "stamp.like": "LIKE", "stamp.skip": "NOPE",
           "toast.msgSent": "Message sent 💌", "toast.undone": "Last swipe undone",
           "toast.noSkips": "Nothing skipped", "toast.restored": "Profiles restored: {n}",
@@ -2121,13 +2121,9 @@
       function candidates(me) {
         const F = S.filters;
         const mySkills = new Set(me.skills || []);
-        const fresh = [];
-        const again = [];
+        const list = [];
         S.profiles.forEach((p) => {
-          if (p.uid === S.uid || p.banned === true) return;
-          const out = S.outgoing.get(p.uid);
-          if (out && out.type !== "skip") return; // лайкнутых не повторяем
-          const list = out ? again : fresh;
+          if (p.uid === S.uid || p.banned === true || S.outgoing.has(p.uid)) return;
           // Кого ищу: если выбран пол, показываем всех людей этого пола, независимо от их целей
           const pref = me.goals?.includes("love") ? me.lookingFor || "any" : "any";
           if (pref !== "any" && p.gender !== pref) return;
@@ -2138,17 +2134,14 @@
           if (F.skills.length && !F.skills.some((s) => (p.skills || []).includes(s))) return;
           const commonSkills = (p.skills || []).filter((s) => mySkills.has(s)).length;
           // люди с общими целями — первыми
-          list.push({ p, shared, score: shared.length * 3 + commonSkills, again: !!out, skippedAt: out?.ts || 0 });
+          list.push({ p, shared, score: shared.length * 3 + commonSkills });
         });
-        fresh.sort((a, b) => {
+        list.sort((a, b) => {
           if (a.p.uid === S.undoUid) return -1;
           if (b.p.uid === S.undoUid) return 1;
           return b.score - a.score || (b.p.createdAt || 0) - (a.p.createdAt || 0);
         });
-        // Новые закончились — по кругу показываем пропущенных, давно пропущенных первыми
-        if (fresh.length) return fresh;
-        again.sort((a, b) => a.skippedAt - b.skippedAt);
-        return again;
+        return list;
       }
 
       function activeFilterCount() {
@@ -2181,7 +2174,7 @@
 
         const list = candidates(me);
         const top = list[0];
-        const sig = top ? `${top.p.uid}:${top.p.updatedAt}:${S.isAdmin}:${top.shared.join()}:${(top.p.goals || []).join()}:${top.again}:${LANG}` : `empty:${activeFilterCount()}:${LANG}`;
+        const sig = top ? `${top.p.uid}:${top.p.updatedAt}:${S.isAdmin}:${top.shared.join()}:${(top.p.goals || []).join()}:${LANG}` : `empty:${activeFilterCount()}:${LANG}`;
         if (!force && sig === S.feedSig) return;
         S.feedSig = sig;
         S.feedDirty = false;
@@ -2192,7 +2185,8 @@
           box.innerHTML = activeFilterCount()
             ? emptyHtml("🔍", t("feed.noneTitle"), t("feed.noneText"),
                 `<button class="btn btn-primary" data-action="reset-filters">${esc(t("btn.resetFilters"))}</button>`)
-            : emptyHtml("✨", t("feed.allTitle"), t("feed.allText"));
+            : emptyHtml("✨", t("feed.allTitle"), t("feed.allText"),
+                `<button class="btn btn-primary" data-action="restore-skips">${esc(t("btn.restore"))}</button>`);
           return;
         }
 
@@ -2209,7 +2203,7 @@
             ${img(p, "card-photo")}
             <div class="card-shade"></div>
             <div class="card-top">
-              <span class="glass">${top.again ? `↻ ${esc(t("feed.again"))} · ` : ""}🎓 ${esc(courseLabel(p.course))} · ${esc(p.group)}</span>
+              <span class="glass">🎓 ${esc(courseLabel(p.course))} · ${esc(p.group)}</span>
               <div class="card-tools">
                 ${adminTools}
                 <button class="glass" data-action="report" data-uid="${esc(p.uid)}" title="${esc(t("tip.report"))}">⚑</button>
