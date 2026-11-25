@@ -866,12 +866,13 @@
       // Конфиг Firebase публичный по задумке: данные защищают Firestore Rules, а не этот ключ.
       const host = location.hostname;
       const firebaseConfig = {
-        apiKey: "AIzaSyDk-TCeUdVf8FXqY5wjGKdFkBChIrrxgtI",
-        authDomain: host.endsWith(".web.app") || host.endsWith(".firebaseapp.com") ? host : "haunted-winter.firebaseapp.com",
-        projectId: "haunted-winter",
-        storageBucket: "haunted-winter.firebasestorage.app",
-        messagingSenderId: "1090602950869",
-        appId: "1:1090602950869:web:ef8b2dc8cfb2b28664825c",
+        apiKey: "AIzaSyBHrOkitWTFgn01TUOBE9BAM0kIT8feRWU",
+        // На Firebase Hosting вход идёт через тот же домен, на остальных хостингах — через firebaseapp.com
+        authDomain: host.endsWith(".web.app") || host.endsWith(".firebaseapp.com") ? host : "aues-juptas.firebaseapp.com",
+        projectId: "aues-juptas",
+        storageBucket: "aues-juptas.firebasestorage.app",
+        messagingSenderId: "721594407906",
+        appId: "1:721594407906:web:7b8af6404d3c299f82f7bb",
       };
 
       const $ = (s, r = document) => r.querySelector(s);
