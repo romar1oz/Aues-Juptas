@@ -262,6 +262,7 @@
         padding: 4px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 700;
         color: #fff; background: color-mix(in srgb, var(--gc) 78%, #000 0%);
       }
+      .goal-badge.dim { opacity: 0.45; }
       .g-love { --gc: var(--love); }
       .g-friends { --gc: var(--friends); }
       .g-study { --gc: var(--study); }
@@ -1433,7 +1434,7 @@
       const skillLabel = (s) => (I18N[LANG]["skill." + s] ?? I18N.ru["skill." + s] ?? s);
 
       const GOAL_EMOJI = { love: "❤️", friends: "🤝", study: "📚", team: "💻" };
-      const goalBadge = (g) => (GOAL_EMOJI[g] ? `<span class="goal-badge g-${g}">${GOAL_EMOJI[g]} ${esc(t("goal." + g))}</span>` : "");
+      const goalBadge = (g, dim = false) => (GOAL_EMOJI[g] ? `<span class="goal-badge g-${g}${dim ? " dim" : ""}">${GOAL_EMOJI[g]} ${esc(t("goal." + g))}</span>` : "");
 
       const POST_KINDS = { hackathon: "🏆", project: "🚀", study: "📚" };
       const kindLabel = (k) => `${POST_KINDS[k] || "🚀"} ${t("kind." + (POST_KINDS[k] ? k : "project"))}`;
@@ -2120,14 +2121,17 @@
         const list = [];
         S.profiles.forEach((p) => {
           if (p.uid === S.uid || p.banned === true || S.outgoing.has(p.uid)) return;
+          // Кого ищу: если выбран пол, показываем всех людей этого пола, независимо от их целей
+          const pref = me.goals?.includes("love") ? me.lookingFor || "any" : "any";
+          if (pref !== "any" && p.gender !== pref) return;
           const shared = sharedGoals(me, p);
-          if (shared.length === 0) return;
-          if (F.goal !== "all" && !shared.includes(F.goal)) return;
+          if (F.goal !== "all" && !(p.goals || []).includes(F.goal)) return;
           if (F.course !== "all" && p.course !== F.course) return;
           if (F.faculty !== "all" && p.faculty !== F.faculty) return;
           if (F.skills.length && !F.skills.some((s) => (p.skills || []).includes(s))) return;
           const commonSkills = (p.skills || []).filter((s) => mySkills.has(s)).length;
-          list.push({ p, shared, score: shared.length * 2 + commonSkills });
+          // люди с общими целями — первыми
+          list.push({ p, shared, score: shared.length * 3 + commonSkills });
         });
         list.sort((a, b) => {
           if (a.p.uid === S.undoUid) return -1;
@@ -2167,7 +2171,7 @@
 
         const list = candidates(me);
         const top = list[0];
-        const sig = top ? `${top.p.uid}:${top.p.updatedAt}:${S.isAdmin}:${top.shared.join()}:${LANG}` : `empty:${activeFilterCount()}:${LANG}`;
+        const sig = top ? `${top.p.uid}:${top.p.updatedAt}:${S.isAdmin}:${top.shared.join()}:${(top.p.goals || []).join()}:${LANG}` : `empty:${activeFilterCount()}:${LANG}`;
         if (!force && sig === S.feedSig) return;
         S.feedSig = sig;
         S.feedDirty = false;
@@ -2205,7 +2209,7 @@
             <div class="stamp stamp-like" id="stamp-like">${esc(t("stamp.like"))}</div>
             <div class="stamp stamp-skip" id="stamp-skip">${esc(t("stamp.skip"))}</div>
             <div class="card-info">
-              <div class="goal-row">${top.shared.map(goalBadge).join("")}</div>
+              <div class="goal-row">${(p.goals || []).map((g) => goalBadge(g, !top.shared.includes(g))).join("")}</div>
               <h2>${esc(p.name)}, <span>${esc(p.age)}</span></h2>
               <p class="card-sub">${esc(p.faculty)}</p>
               ${p.bio ? `<p class="card-bio">${esc(p.bio)}</p>` : ""}
