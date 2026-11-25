@@ -335,8 +335,8 @@
         font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: 0.06em;
         opacity: 0; pointer-events: none; background: rgba(0, 0, 0, 0.35);
       }
-      .stamp-like { right: 18px; color: #7ff0bf; border-color: #7ff0bf; transform: rotate(12deg); }
-      .stamp-skip { left: 18px; color: #ff9aa8; border-color: #ff9aa8; transform: rotate(-12deg); }
+      .stamp-like { left: 18px; color: #7ff0bf; border-color: #7ff0bf; transform: rotate(-12deg); }
+      .stamp-skip { right: 18px; color: #ff9aa8; border-color: #ff9aa8; transform: rotate(12deg); }
 
       .swipe-actions { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 12px 0 4px; flex-shrink: 0; }
       .round { border-radius: 50%; display: grid; place-items: center; transition: transform 0.15s, opacity 0.2s; }
@@ -2243,8 +2243,8 @@
           dx = e.clientX - startX;
           card.style.transform = `translateX(${dx}px) rotate(${dx * 0.05}deg)`;
           const k = Math.min(Math.abs(dx) / 100, 1);
-          like.style.opacity = dx > 15 ? k : 0;
-          skip.style.opacity = dx < -15 ? k : 0;
+          like.style.opacity = dx < -15 ? k : 0;
+          skip.style.opacity = dx > 15 ? k : 0;
         });
 
         const end = () => {
@@ -2252,8 +2252,8 @@
           active = false;
           S.dragging = false;
           card.classList.add("animating");
-          if (dx > 100) swipe("like");
-          else if (dx < -100) swipe("skip");
+          if (dx < -100) swipe("like");
+          else if (dx > 100) swipe("skip");
           else {
             card.style.transform = "";
             like.style.opacity = 0;
@@ -2282,7 +2282,7 @@
         const card = $("#swipe-card");
         if (card) {
           card.classList.add("animating");
-          card.style.transform = `translateX(${type === "like" ? 520 : -520}px) rotate(${type === "like" ? 22 : -22}deg)`;
+          card.style.transform = `translateX(${type === "like" ? -520 : 520}px) rotate(${type === "like" ? -22 : 22}deg)`;
           card.style.opacity = "0";
         }
         if (S.undoUid === uid) S.undoUid = null;
@@ -2957,8 +2957,8 @@
         if (e.key === "Escape") $$(".modal").forEach((m) => (m.hidden = true));
         const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || "");
         if (typing || S.tab !== "discover" || $("#screen-main").hidden || $$(".modal").some((m) => !m.hidden)) return;
-        if (e.key === "ArrowRight") swipe("like");
-        if (e.key === "ArrowLeft") swipe("skip");
+        if (e.key === "ArrowLeft") swipe("like");
+        if (e.key === "ArrowRight") swipe("skip");
       });
 
       /* =====================================================================
