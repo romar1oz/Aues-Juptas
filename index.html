@@ -898,7 +898,7 @@
           "goal.study.d": "сессия, курсовые", "goal.team.d": "хакатоны и проекты",
           "login.inapp": "Похоже, сайт открыт внутри Instagram, Telegram или TikTok. Google не разрешает вход в таких окнах: нажмите <b>⋯</b> и выберите <b>«Открыть в браузере»</b>.",
           "login.google": "Войти через Google",
-          "login.fine": "Только 18+. Email нужен лишь для входа и никому не показывается. Telegram и Instagram открываются только при взаимной симпатии.",
+          "login.fine": "Только 18+. Email нужен лишь для входа и никому не показывается. Telegram и Instagram видны только при взаимной симпатии и администратору для модерации.",
 
           "form.create": "Создание анкеты", "form.edit": "Редактирование анкеты",
           "form.required": "Поля со * обязательны", "form.progress": "Анкета заполнена на {n}%",
@@ -923,7 +923,7 @@
           "likes.in": "Входящие", "likes.inSub": "Вам поставили лайк",
           "likes.matches": "Мэтчи", "likes.matchesSub": "Симпатия взаимна, контакты открыты",
           "admin.title": "🛡 Админ-панель", "admin.sub": "Жалобы и модерация анкет",
-          "admin.reports": "Жалобы", "admin.users": "Пользователи", "admin.search": "Поиск: имя, группа, факультет",
+          "admin.reports": "Жалобы", "admin.users": "Пользователи", "admin.search": "Поиск: имя, группа, факультет, Telegram, Instagram",
           "filter.all": "Все", "filter.active": "Активные", "filter.banned": "Забаненные",
           "nav.discover": "Лента", "nav.posts": "Команды", "nav.likes": "Симпатии", "nav.profile": "Профиль", "nav.admin": "Админ",
 
@@ -1058,7 +1058,7 @@
           "goal.study.d": "сессия, курстық жұмыс", "goal.team.d": "хакатондар мен жобалар",
           "login.inapp": "Сайт Instagram, Telegram немесе TikTok ішінде ашылған сияқты. Google мұндай терезелерде кіруге рұқсат бермейді: <b>⋯</b> басып, <b>«Браузерде ашу»</b> таңдаңыз.",
           "login.google": "Google арқылы кіру",
-          "login.fine": "Тек 18+. Email тек кіру үшін қажет және ешкімге көрсетілмейді. Telegram мен Instagram тек өзара симпатия болғанда ашылады.",
+          "login.fine": "Тек 18+. Email тек кіру үшін қажет және ешкімге көрсетілмейді. Telegram мен Instagram тек өзара симпатия болғанда және модерация үшін әкімшіге көрінеді.",
 
           "form.create": "Анкета құру", "form.edit": "Анкетаны өңдеу",
           "form.required": "* белгісі бар өрістер міндетті", "form.progress": "Анкета {n}% толтырылды",
@@ -1083,7 +1083,7 @@
           "likes.in": "Кіріс", "likes.inSub": "Сізге лайк басқандар",
           "likes.matches": "Мэтчтер", "likes.matchesSub": "Симпатия өзара, байланыс ашық",
           "admin.title": "🛡 Әкімші панелі", "admin.sub": "Шағымдар және анкеталарды модерациялау",
-          "admin.reports": "Шағымдар", "admin.users": "Пайдаланушылар", "admin.search": "Іздеу: аты, тобы, факультеті",
+          "admin.reports": "Шағымдар", "admin.users": "Пайдаланушылар", "admin.search": "Іздеу: аты, тобы, факультеті, Telegram, Instagram",
           "filter.all": "Барлығы", "filter.active": "Белсенді", "filter.banned": "Бұғатталған",
           "nav.discover": "Таспа", "nav.posts": "Командалар", "nav.likes": "Симпатиялар", "nav.profile": "Профиль", "nav.admin": "Әкімші",
 
@@ -1218,7 +1218,7 @@
           "goal.study.d": "exams, coursework", "goal.team.d": "hackathons and projects",
           "login.inapp": "Looks like this page is open inside Instagram, Telegram or TikTok. Google blocks sign-in there: tap <b>⋯</b> and choose <b>“Open in browser”</b>.",
           "login.google": "Sign in with Google",
-          "login.fine": "18+ only. Your email is used only to sign in and is never shown. Telegram and Instagram are revealed only on a mutual match.",
+          "login.fine": "18+ only. Your email is used only to sign in and is never shown. Telegram and Instagram are shown only on a mutual match and to the admin for moderation.",
 
           "form.create": "Create profile", "form.edit": "Edit profile",
           "form.required": "Fields marked * are required", "form.progress": "Profile {n}% complete",
@@ -1243,7 +1243,7 @@
           "likes.in": "Incoming", "likes.inSub": "People who liked you",
           "likes.matches": "Matches", "likes.matchesSub": "It's mutual — contacts unlocked",
           "admin.title": "🛡 Admin panel", "admin.sub": "Reports and moderation",
-          "admin.reports": "Reports", "admin.users": "Users", "admin.search": "Search: name, group, faculty",
+          "admin.reports": "Reports", "admin.users": "Users", "admin.search": "Search: name, group, faculty, Telegram, Instagram",
           "filter.all": "All", "filter.active": "Active", "filter.banned": "Banned",
           "nav.discover": "Discover", "nav.posts": "Teams", "nav.likes": "Likes", "nav.profile": "Profile", "nav.admin": "Admin",
 
@@ -1470,6 +1470,7 @@
         incoming: new Map(),
         posts: [],
         allLikes: [],
+        allPrivate: new Map(), // только для админа: uid -> контакты
         reports: [],
         contactsCache: new Map(),
         knownMatches: null,
@@ -1679,7 +1680,7 @@
           isAdmin: false,
           loaded: { profiles: false, priv: false, out: false, inc: false },
           profiles: new Map(), myPrivate: null, outgoing: new Map(), incoming: new Map(),
-          posts: [], allLikes: [], reports: [], contactsCache: new Map(), knownMatches: null,
+          posts: [], allLikes: [], allPrivate: new Map(), reports: [], contactsCache: new Map(), knownMatches: null,
           editing: false, formOpen: false, feedSig: "", lastSwipe: null, undoUid: null, tab: "discover",
         });
         $$(".modal").forEach((m) => (m.hidden = true));
@@ -1758,6 +1759,14 @@
               S.allLikes = list;
               if (S.tab === "admin") renderAdmin();
             }, listenError("admin-likes"))
+          );
+          S.unsub.push(
+            onSnapshot(collection(db, C.private), (snap) => {
+              const m = new Map();
+              snap.forEach((d) => m.set(d.id, d.data()));
+              S.allPrivate = m;
+              if (S.tab === "admin") renderAdmin();
+            }, listenError("admin-private"))
           );
           S.unsub.push(
             onSnapshot(collection(db, C.reports), (snap) => {
@@ -2737,6 +2746,7 @@
                     <p>${esc(t("admin.reportFrom", { name: from?.name || t("admin.unknown"), time: timeAgo(r.ts) }))}</p>
                   </div></div>
                   <div class="bubble">⚑ ${esc(reasonLabel(r.reason))}</div>
+                  ${tg ? `<div class="contacts">${contactsHtml(S.allPrivate.get(tg.uid))}</div>` : ""}
                   <div class="actions">
                     <button class="btn btn-ghost grow" data-action="dismiss-report" data-id="${esc(r.id)}">${esc(t("btn.dismiss"))}</button>
                     ${tg && !tg.banned ? `<button class="btn btn-danger grow" data-action="admin-ban" data-uid="${esc(tg.uid)}" data-ban="true" data-report="${esc(r.id)}">${esc(t("btn.ban"))}</button>` : ""}
@@ -2750,7 +2760,8 @@
         const filtered = profiles.filter((p) => {
           if (S.adminFilter === "active" && p.banned) return false;
           if (S.adminFilter === "banned" && !p.banned) return false;
-          if (q && !`${p.name} ${p.group} ${p.faculty} ${p.course}`.toLowerCase().includes(q)) return false;
+          const pv = S.allPrivate.get(p.uid) || {};
+          if (q && !`${p.name} ${p.group} ${p.faculty} ${p.course} ${pv.telegram || ""} ${pv.instagram || ""}`.toLowerCase().includes(q)) return false;
           return true;
         });
         $("#admin-users").innerHTML = filtered.length
@@ -2765,6 +2776,7 @@
                     <p>${esc(t("admin.goals"))} ${(p.goals || []).map((g) => GOAL_EMOJI[g] || "").join(" ")} ${rc ? `· <span style="color:var(--danger)">${esc(t("admin.reportsN", { n: rc }))}</span>` : ""}</p>
                   </div></div>
                   ${p.bio ? `<p class="small muted" style="margin:0">${esc(p.bio)}</p>` : ""}
+                  <div class="contacts">${contactsHtml(S.allPrivate.get(p.uid))}</div>
                   <div class="actions">
                     ${p.uid === S.uid ? `<span class="small muted">${esc(t("admin.you"))}</span>` : `
                     <button class="btn ${p.banned ? "btn-ok" : "btn-ghost"} grow" data-action="admin-ban" data-uid="${esc(p.uid)}" data-ban="${!p.banned}">${esc(p.banned ? t("btn.unban") : t("btn.banIcon"))}</button>
