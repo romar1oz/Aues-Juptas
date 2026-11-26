@@ -445,6 +445,12 @@
       .conv-prev.muted { color: var(--muted); }
       .conv.unread .conv-prev { color: var(--text); font-weight: 700; }
       .conv-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+      .gpill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+      .gpill.gm { background: rgba(80,140,255,.18); color: #5e9bff; }
+      .gpill.gf { background: rgba(255,90,140,.2); color: #ff6ba0; }
+      .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #35c56a; display: inline-block; margin-right: 5px; vertical-align: middle; }
+      .tick { font-size: 11px; opacity: .85; margin-left: 6px; }
+      .tick.read { color: #8fd0ff; opacity: 1; }
       .person[data-action], .chat-head-open { cursor: pointer; }
       .pv-photo { width: 100%; aspect-ratio: 1/1; max-height: 320px; object-fit: cover; border-radius: 18px; background: var(--input); }
       .pv-name { margin: 12px 0 2px; font-size: 20px; }
@@ -881,6 +887,10 @@
         <div class="modal-box">
           <h3 data-i18n="flt.title"></h3>
           <div class="field">
+            <label data-i18n="flt.gender"></label>
+            <div class="chips" id="flt-gender"></div>
+          </div>
+          <div class="field">
             <label data-i18n="flt.goal"></label>
             <div class="chips" id="flt-goal"></div>
           </div>
@@ -1085,7 +1095,7 @@
           "post.titlePh": "Ищу дизайнера на хакатон", "post.text": "Описание",
           "post.textPh": "Что за проект, сроки, кого не хватает…", "post.skills": "Кого ищем",
           "post.skillsHint": "до 8 навыков", "post.publish": "Опубликовать",
-          "flt.title": "Фильтры ленты", "flt.goal": "Цель", "flt.course": "Курс", "flt.faculty": "Факультет",
+          "flt.title": "Фильтры ленты", "flt.gender": "Кого показывать", "flt.goal": "Цель", "flt.course": "Курс", "flt.faculty": "Факультет",
           "flt.skills": "Навыки", "flt.skillsHint": "достаточно одного совпадения", "flt.allFaculties": "Все факультеты",
           "btn.reset": "Сбросить", "btn.show": "Показать",
           "confirm.title": "Вы уверены?", "btn.yes": "Да",
@@ -1149,7 +1159,7 @@
           "likes.noneMatch": "Когда симпатия станет взаимной, здесь появятся контакты",
           "btn.reject": "Пропустить", "btn.accept": "Ответить взаимностью ♥", "btn.unmatch": "Отменить",
           "btn.chat": "Написать", "chat.ph": "Сообщение…", "chat.send": "Отправить",
-          "chat.empty": "Пока нет сообщений. Напишите первым 👋", "chat.needMatch": "Чат доступен только при взаимном лайке",
+          "chat.empty": "Пока нет сообщений. Напишите первым 👋", "chat.needMatch": "Чат доступен только при взаимном лайке", "chat.online": "в сети", "chat.lastSeen": "был(а)",
           "chat.block": "Заблокировать", "chat.blockTitle": "Заблокировать?", "chat.blockText": "Мэтч будет удалён, и человек больше не появится в ленте. Продолжить?", "chat.blockOk": "Заблокировать", "toast.blocked": "Пользователь заблокирован",
           "nav.chats": "Чат", "chats.title": "Сообщения", "chats.sub": "Люди, с которыми вы общаетесь",
           "chats.empty": "Пока нет чатов. Найдите мэтч, чтобы начать общение 💬", "chats.you": "Вы:", "chats.start": "Новый мэтч — напишите первым 👋",
@@ -1189,6 +1199,7 @@
           "skill.sport": "Спорт", "skill.music": "Музыка", "skill.games": "Игры", "skill.photo": "Фото",
 
           ice: {
+            campus: ["Сходим в Лабтоп на чай? ☕", "Пообедаем в столовой корпуса? 🍲", "Прогуляемся после пар?"],
             love: ["Сходим на кофе после пар? ☕", "Какую музыку слушаешь по дороге в универ?", "Привет! Улыбнуло твоё описание 🙂"],
             friends: ["Привет! Давай знакомиться 👋", "Где любишь зависать после пар?", "Го в компанию на выходных?"],
             study: ["Готовимся к сессии вместе? 📚", "Может, объединимся для курсовой?", "Какой предмет даётся тяжелее всего?"],
@@ -1275,7 +1286,7 @@
           "post.titlePh": "Хакатонға дизайнер іздеймін", "post.text": "Сипаттама",
           "post.textPh": "Қандай жоба, мерзімі, кім жетіспейді…", "post.skills": "Кімді іздейміз",
           "post.skillsHint": "8 дағдыға дейін", "post.publish": "Жариялау",
-          "flt.title": "Таспа сүзгілері", "flt.goal": "Мақсат", "flt.course": "Курс", "flt.faculty": "Факультет",
+          "flt.title": "Таспа сүзгілері", "flt.gender": "Кімді көрсету", "flt.goal": "Мақсат", "flt.course": "Курс", "flt.faculty": "Факультет",
           "flt.skills": "Дағдылар", "flt.skillsHint": "бір сәйкестік жеткілікті", "flt.allFaculties": "Барлық факультеттер",
           "btn.reset": "Тазарту", "btn.show": "Көрсету",
           "confirm.title": "Сенімдісіз бе?", "btn.yes": "Иә",
@@ -1339,7 +1350,7 @@
           "likes.noneMatch": "Симпатия өзара болғанда, байланыс осында пайда болады",
           "btn.reject": "Өткізу", "btn.accept": "Жауап лайк басу ♥", "btn.unmatch": "Болдырмау",
           "btn.chat": "Жазу", "chat.ph": "Хабарлама…", "chat.send": "Жіберу",
-          "chat.empty": "Әзірге хабарлама жоқ. Бірінші боп жазыңыз 👋", "chat.needMatch": "Чат тек өзара лайк болғанда ашылады",
+          "chat.empty": "Әзірге хабарлама жоқ. Бірінші боп жазыңыз 👋", "chat.needMatch": "Чат тек өзара лайк болғанда ашылады", "chat.online": "желіде", "chat.lastSeen": "соңғы рет",
           "chat.block": "Бұғаттау", "chat.blockTitle": "Бұғаттау керек пе?", "chat.blockText": "Мэтч жойылады және бұл адам лентада қайта көрінбейді. Жалғастырамыз ба?", "chat.blockOk": "Бұғаттау", "toast.blocked": "Пайдаланушы бұғатталды",
           "nav.chats": "Чат", "chats.title": "Хабарламалар", "chats.sub": "Сөйлескен адамдарың",
           "chats.empty": "Әзірге чат жоқ. Сөйлесу үшін мэтч тап 💬", "chats.you": "Сен:", "chats.start": "Жаңа мэтч — бірінші боп жаз 👋",
@@ -1379,6 +1390,7 @@
           "skill.sport": "Спорт", "skill.music": "Музыка", "skill.games": "Ойындар", "skill.photo": "Фото",
 
           ice: {
+            campus: ["Лабтопқа барып шай ішейік ☕", "Корпус асханасынан бірге тамақ ішейік 🍲", "Сабақтан кейін серуендейік пе?"],
             love: ["Сабақтан кейін кофе ішейік пе? ☕", "Универге бара жатқанда қандай музыка тыңдайсың?", "Сәлем! Сипаттамаң ұнады 🙂"],
             friends: ["Сәлем! Танысайық 👋", "Сабақтан кейін қайда жүргенді ұнатасың?", "Демалыста бірге жүрейік пе?"],
             study: ["Сессияға бірге дайындалайық па? 📚", "Курстық жұмысқа бірігейік пе?", "Қай пән саған қиын?"],
@@ -1465,7 +1477,7 @@
           "post.titlePh": "Looking for a designer for a hackathon", "post.text": "Description",
           "post.textPh": "What's the project, timeline, who's missing…", "post.skills": "Looking for",
           "post.skillsHint": "up to 8 skills", "post.publish": "Publish",
-          "flt.title": "Feed filters", "flt.goal": "Goal", "flt.course": "Year", "flt.faculty": "Faculty",
+          "flt.title": "Feed filters", "flt.gender": "Show", "flt.goal": "Goal", "flt.course": "Year", "flt.faculty": "Faculty",
           "flt.skills": "Skills", "flt.skillsHint": "any one match is enough", "flt.allFaculties": "All faculties",
           "btn.reset": "Reset", "btn.show": "Show",
           "confirm.title": "Are you sure?", "btn.yes": "Yes",
@@ -1529,7 +1541,7 @@
           "likes.noneMatch": "When a like is mutual, contacts will appear here",
           "btn.reject": "Skip", "btn.accept": "Like back ♥", "btn.unmatch": "Unmatch",
           "btn.chat": "Message", "chat.ph": "Message…", "chat.send": "Send",
-          "chat.empty": "No messages yet. Say hi first 👋", "chat.needMatch": "Chat opens only on a mutual like",
+          "chat.empty": "No messages yet. Say hi first 👋", "chat.needMatch": "Chat opens only on a mutual like", "chat.online": "online", "chat.lastSeen": "last seen",
           "chat.block": "Block", "chat.blockTitle": "Block this person?", "chat.blockText": "The match will be removed and they won\u2019t appear in your feed again. Continue?", "chat.blockOk": "Block", "toast.blocked": "User blocked",
           "nav.chats": "Chats", "chats.title": "Messages", "chats.sub": "People you\u2019re talking to",
           "chats.empty": "No chats yet. Get a match to start talking 💬", "chats.you": "You:", "chats.start": "New match — say hi first 👋",
@@ -1569,6 +1581,7 @@
           "skill.sport": "Sports", "skill.music": "Music", "skill.games": "Gaming", "skill.photo": "Photography",
 
           ice: {
+            campus: ["Grab tea at Labtop? ☕", "Lunch at the campus canteen? 🍲", "Walk after classes?"],
             love: ["Coffee after class? ☕", "What music do you listen to on the way to uni?", "Hi! Your bio made me smile 🙂"],
             friends: ["Hi! Let's be friends 👋", "Where do you like to hang out after class?", "Want to hang out this weekend?"],
             study: ["Study for exams together? 📚", "Want to team up on coursework?", "Which subject is the hardest for you?"],
@@ -1818,7 +1831,7 @@
       }
 
       function loadFilters() {
-        const base = { goal: "all", course: "all", faculty: "all", skills: [] };
+        const base = { gender: "all", goal: "all", course: "all", faculty: "all", skills: [] };
         try {
           const raw = JSON.parse(localStorage.getItem("cl_filters") || "null");
           if (raw && typeof raw === "object") return { ...base, ...raw, skills: Array.isArray(raw.skills) ? raw.skills : [] };
@@ -1966,6 +1979,8 @@
         }
         startListeners();
         touchPresence();
+        if (S.hbTimer) clearInterval(S.hbTimer);
+        S.hbTimer = setInterval(() => { if (!document.hidden) touchPresence(); }, 60000);
       }
 
       onAuthStateChanged(auth, async (user) => {
@@ -1985,8 +2000,11 @@
       });
 
       function teardown() {
-        if (S.chat && S.chat.unsub) { try { S.chat.unsub(); } catch (e) {} }
+        if (S.chat) {
+          [S.chat.unsub, S.chat.unsubPresence, S.chat.unsubRead].forEach((fn) => { try { fn && fn(); } catch (e) {} });
+        }
         S.chat = null;
+        if (S.hbTimer) { clearInterval(S.hbTimer); S.hbTimer = null; }
         if (S.chatListeners) { S.chatListeners.forEach((fn) => { try { fn(); } catch (e) {} }); S.chatListeners = null; }
         S.chatSeeded = new Set();
         S.chatReads = null;
@@ -2455,6 +2473,7 @@
           const pref = me.goals?.includes("love") ? me.lookingFor || "any" : "any";
           if (pref !== "any" && p.gender !== pref) return;
           const shared = sharedGoals(me, p);
+          if (F.gender !== "all" && p.gender !== F.gender) return;
           if (F.goal !== "all" && !(p.goals || []).includes(F.goal)) return;
           if (F.course !== "all" && p.course !== F.course) return;
           if (F.faculty !== "all" && p.faculty !== F.faculty) return;
@@ -2473,7 +2492,7 @@
 
       function activeFilterCount() {
         const F = S.filters;
-        return (F.goal !== "all") + (F.course !== "all") + (F.faculty !== "all") + (F.skills.length > 0);
+        return (F.gender !== "all") + (F.goal !== "all") + (F.course !== "all") + (F.faculty !== "all") + (F.skills.length > 0);
       }
 
       function emptyHtml(em, title, text, buttons = "") {
@@ -2540,7 +2559,7 @@
             <div class="stamp stamp-like" id="stamp-like">${esc(t("stamp.like"))}</div>
             <div class="stamp stamp-skip" id="stamp-skip">${esc(t("stamp.skip"))}</div>
             <div class="card-info">
-              <div class="goal-row">${(p.goals || []).map((g) => goalBadge(g, !top.shared.includes(g))).join("")}</div>
+              <div class="goal-row">${genderBadge(p.gender)}${(p.goals || []).map((g) => goalBadge(g, !top.shared.includes(g))).join("")}</div>
               <h2>${esc(p.name)}, <span>${esc(p.age)}</span></h2>
               <p class="card-sub">${esc(p.faculty)}</p>
               ${p.bio ? `<p class="card-bio">${esc(p.bio)}</p>` : ""}
@@ -2668,6 +2687,10 @@
         const chip = (group, value, label, active) =>
           `<button class="chip ${active ? "active" : ""}" data-action="flt" data-group="${group}" data-value="${esc(value)}">${esc(label)}</button>`;
 
+        $("#flt-gender").innerHTML =
+          chip("gender", "all", t("filter.all"), D.gender === "all") +
+          chip("gender", "m", "♂ " + t("gender.m"), D.gender === "m") +
+          chip("gender", "f", "♀ " + t("gender.f"), D.gender === "f");
         $("#flt-goal").innerHTML =
           chip("goal", "all", t("filter.all"), D.goal === "all") +
           Object.keys(GOAL_EMOJI).map((k) => chip("goal", k, `${GOAL_EMOJI[k]} ${t("goal." + k)}`, D.goal === k)).join("");
@@ -2711,7 +2734,7 @@
 
         const g = goals || sharedGoals(me, p);
         const ice = t("ice");
-        const lines = (g.length ? g : ["friends"]).flatMap((k) => ice[k] || []);
+        const lines = [...(ice.campus || []), ...(g.length ? g : ["friends"]).flatMap((k) => ice[k] || [])];
         $("#msg-icebreakers").innerHTML = lines
           .map((x) => `<button class="chip" data-action="icebreaker" data-value="${esc(x)}">${esc(x)}</button>`)
           .join("");
@@ -3175,7 +3198,7 @@
         if (!me || !p) return;
         if (!matchUids().has(uid)) return toast(t("chat.needMatch"));
         closeChat();
-        S.chat = { uid, id: chatIdWith(uid), msgs: [] };
+        S.chat = { uid, id: chatIdWith(uid), msgs: [], p, partnerSeen: 0, partnerRead: 0 };
         $("#chat-photo").src = photoOf(p);
         $("#chat-photo").dataset.fallback = p.name;
         $("#chat-name").textContent = `${p.name}, ${p.age}`;
@@ -3196,10 +3219,35 @@
               const last = list[list.length - 1];
               S.chatPreviews.set(S.chat.uid, { text: last.text, ts: last.ts, senderUid: last.senderUid });
               markRead(S.chat.uid);
+              markReadRemote(S.chat.id);
             }
           }
         }, (err) => toast(fbErr(err)));
+        markReadRemote(S.chat.id);
+        S.chat.unsubPresence = onSnapshot(ref.presence(uid), (d) => {
+          if (S.chat) { S.chat.partnerSeen = (d.data() && d.data().lastSeen) || 0; updateChatStatus(); }
+        }, () => {});
+        S.chat.unsubRead = onSnapshot(doc(db, C.chats, S.chat.id, "reads", uid), (d) => {
+          if (S.chat) { S.chat.partnerRead = (d.data() && d.data().lastRead) || 0; renderChatMessages(); }
+        }, () => {});
+        updateChatStatus();
         setTimeout(() => $("#chat-input").focus(), 120);
+      }
+
+      function updateChatStatus() {
+        if (!S.chat) return;
+        const seen = S.chat.partnerSeen || 0;
+        const el = $("#chat-sub");
+        if (!el) return;
+        if (Date.now() - seen < 90000) el.innerHTML = `<span class="online-dot"></span>${esc(t("chat.online"))}`;
+        else if (seen) el.textContent = `${t("chat.lastSeen")} ${timeAgo(seen)}`;
+        else el.textContent = `${courseLabel(S.chat.p.course)} · ${S.chat.p.group}`;
+      }
+      async function markReadRemote(chatId) {
+        const now = Date.now();
+        if (S.chat && S.chat.myReadSent && now - S.chat.myReadSent < 1500) return;
+        if (S.chat) S.chat.myReadSent = now;
+        try { await setDoc(doc(db, C.chats, chatId, "reads", S.uid), { lastRead: now }); } catch (e) {}
       }
 
       function renderChatMessages() {
@@ -3210,7 +3258,12 @@
           return;
         }
         box.innerHTML = S.chat.msgs
-          .map((m) => `<div class="chat-row ${m.senderUid === S.uid ? "me" : "them"}"><div class="chat-bubble">${esc(m.text)}</div></div>`)
+          .map((m) => {
+            const mine = m.senderUid === S.uid;
+            const read = mine && m.ts <= (S.chat.partnerRead || 0);
+            const tick = mine ? `<span class="tick ${read ? "read" : ""}">${read ? "✓✓" : "✓"}</span>` : "";
+            return `<div class="chat-row ${mine ? "me" : "them"}"><div class="chat-bubble">${esc(m.text)}${tick}</div></div>`;
+          })
           .join("");
         box.scrollTop = box.scrollHeight;
       }
@@ -3235,7 +3288,9 @@
       }
 
       function closeChat() {
-        if (S.chat && S.chat.unsub) { try { S.chat.unsub(); } catch (e) {} }
+        if (S.chat) {
+          [S.chat.unsub, S.chat.unsubPresence, S.chat.unsubRead].forEach((fn) => { try { fn && fn(); } catch (e) {} });
+        }
         S.chat = null;
         closeModal("modal-chat");
         if (S.tab === "chats") renderChats(false);
@@ -3363,6 +3418,12 @@
       }
 
       /* ---- Просмотр чужого профиля ---- */
+      function genderBadge(g) {
+        if (g === "m") return `<span class="gpill gm">♂ ${esc(t("gender.m"))}</span>`;
+        if (g === "f") return `<span class="gpill gf">♀ ${esc(t("gender.f"))}</span>`;
+        return "";
+      }
+
       function openProfile(uid) {
         const p = S.profiles.get(uid);
         if (!p) return;
@@ -3384,7 +3445,7 @@
           <h2 class="pv-name">${esc(p.name)}, ${esc(p.age)}</h2>
           <p class="pv-sub">${esc(courseLabel(p.course))} · ${esc(p.group)} · ${esc(p.faculty)}</p>
           <div class="pv-sec">${esc(t("pv.goals"))}</div>
-          <div class="goal-row">${goals || `<span class="small muted">—</span>`}</div>
+          <div class="goal-row">${genderBadge(p.gender)}${goals || `<span class="small muted">—</span>`}</div>
           ${p.bio ? `<div class="pv-sec">${esc(t("pv.about"))}</div><p class="pv-bio">${esc(p.bio)}</p>` : ""}
           <div class="pv-sec">${esc(t("pv.skills"))}</div>
           ${skills}
@@ -3468,7 +3529,7 @@
           renderFilterSheet();
         },
         "apply-filters": () => applyFilters(S.filterDraft),
-        "reset-filters": () => applyFilters({ goal: "all", course: "all", faculty: "all", skills: [] }),
+        "reset-filters": () => applyFilters({ gender: "all", goal: "all", course: "all", faculty: "all", skills: [] }),
 
         "icebreaker": (el) => {
           const ta = $("#msg-text");

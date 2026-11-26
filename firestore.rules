@@ -177,9 +177,19 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // ---------- Статус прочтения: u_chats/{chatId}/reads/{uid} = { lastRead } ----------
+    match /u_chats/{chatId}/reads/{uid} {
+      allow read: if inChat(chatId) && isMatch(chatOther(chatId));
+      allow create, update: if inChat(chatId)
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastRead'])
+        && request.resource.data.lastRead is int;
+      allow delete: if false;
+    }
+
     // ---------- Присутствие: кто когда заходил (видит только админ и сам владелец) ----------
     match /u_presence/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
+      allow read: if isOwner(uid) || isAdmin() || isMatch(uid);
       allow create, update: if isOwner(uid)
         && request.resource.data.keys().hasOnly(['lastSeen'])
         && request.resource.data.lastSeen is int;
