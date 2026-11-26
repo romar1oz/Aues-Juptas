@@ -436,6 +436,13 @@
       .chat-row.me .chat-bubble { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--on-accent); border-bottom-right-radius: 4px; }
       .chat-input-row { display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); flex-shrink: 0; }
       .chat-input-row .input { flex: 1; }
+      .conv { cursor: pointer; }
+      .conv:hover { border-color: var(--accent); }
+      .conv-head { display: flex; align-items: baseline; gap: 8px; }
+      .conv-head h4 { flex: 1; min-width: 0; }
+      .conv-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+      .conv-prev { margin: 3px 0 0; font-size: 12.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .conv-prev.muted { color: var(--muted); }
       .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-20px); z-index: 80; max-width: 90vw; padding: 10px 16px; border-radius: 99px; background: var(--elev); color: var(--text); border: 1px solid var(--accent); box-shadow: var(--shadow); font-size: 12.5px; font-weight: 600; text-align: center; opacity: 0; pointer-events: none; transition: all 0.25s; }
       .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -701,6 +708,17 @@
               <div class="stack" id="matches-list"></div>
             </div>
 
+            <!-- Чат: список переписок -->
+            <div class="tab scroll" id="tab-chats" hidden>
+              <div class="section-head">
+                <div>
+                  <h2 data-i18n="chats.title"></h2>
+                  <p data-i18n="chats.sub"></p>
+                </div>
+              </div>
+              <div class="stack" id="chats-list"></div>
+            </div>
+
             <!-- Профиль -->
             <div class="tab scroll" id="tab-profile" hidden>
               <div class="stack" id="profile-content"></div>
@@ -741,6 +759,10 @@
               <span class="dot-badge" id="badge-likes" hidden>0</span>
               <svg fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
               <span data-i18n="nav.likes"></span>
+            </button>
+            <button class="nav-btn" data-action="tab" data-tab="chats">
+              <svg fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.84L3 20l1.3-3.9A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+              <span data-i18n="nav.chats"></span>
             </button>
             <button class="nav-btn" data-action="tab" data-tab="profile">
               <svg fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -915,7 +937,7 @@
         sendEmailVerification, sendPasswordResetEmail,
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
       import {
-        getFirestore, collection, doc, setDoc, getDoc, deleteDoc, updateDoc, addDoc,
+        getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, addDoc,
         onSnapshot, query, where, orderBy, limit,
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
@@ -1106,6 +1128,8 @@
           "btn.chat": "Написать", "chat.ph": "Сообщение…", "chat.send": "Отправить",
           "chat.empty": "Пока нет сообщений. Напишите первым 👋", "chat.needMatch": "Чат доступен только при взаимном лайке",
           "chat.block": "Заблокировать", "chat.blockTitle": "Заблокировать?", "chat.blockText": "Мэтч будет удалён, и человек больше не появится в ленте. Продолжить?", "chat.blockOk": "Заблокировать", "toast.blocked": "Пользователь заблокирован",
+          "nav.chats": "Чат", "chats.title": "Сообщения", "chats.sub": "Люди, с которыми вы общаетесь",
+          "chats.empty": "Пока нет чатов. Найдите мэтч, чтобы начать общение 💬", "chats.you": "Вы:", "chats.start": "Новый мэтч — напишите первым 👋",
           "toast.skipped": "Пропущено",
 
           "profile.noneTitle": "Анкеты пока нет",
@@ -1292,6 +1316,8 @@
           "btn.chat": "Жазу", "chat.ph": "Хабарлама…", "chat.send": "Жіберу",
           "chat.empty": "Әзірге хабарлама жоқ. Бірінші боп жазыңыз 👋", "chat.needMatch": "Чат тек өзара лайк болғанда ашылады",
           "chat.block": "Бұғаттау", "chat.blockTitle": "Бұғаттау керек пе?", "chat.blockText": "Мэтч жойылады және бұл адам лентада қайта көрінбейді. Жалғастырамыз ба?", "chat.blockOk": "Бұғаттау", "toast.blocked": "Пайдаланушы бұғатталды",
+          "nav.chats": "Чат", "chats.title": "Хабарламалар", "chats.sub": "Сөйлескен адамдарың",
+          "chats.empty": "Әзірге чат жоқ. Сөйлесу үшін мэтч тап 💬", "chats.you": "Сен:", "chats.start": "Жаңа мэтч — бірінші боп жаз 👋",
           "toast.skipped": "Өткізілді",
 
           "profile.noneTitle": "Әзірге анкета жоқ",
@@ -1478,6 +1504,8 @@
           "btn.chat": "Message", "chat.ph": "Message…", "chat.send": "Send",
           "chat.empty": "No messages yet. Say hi first 👋", "chat.needMatch": "Chat opens only on a mutual like",
           "chat.block": "Block", "chat.blockTitle": "Block this person?", "chat.blockText": "The match will be removed and they won\u2019t appear in your feed again. Continue?", "chat.blockOk": "Block", "toast.blocked": "User blocked",
+          "nav.chats": "Chats", "chats.title": "Messages", "chats.sub": "People you\u2019re talking to",
+          "chats.empty": "No chats yet. Get a match to start talking 💬", "chats.you": "You:", "chats.start": "New match — say hi first 👋",
           "toast.skipped": "Skipped",
 
           "profile.noneTitle": "No profile yet",
@@ -1905,6 +1933,7 @@
       function teardown() {
         if (S.chat && S.chat.unsub) { try { S.chat.unsub(); } catch (e) {} }
         S.chat = null;
+        if (S.chatPreviews) S.chatPreviews.clear();
         S.unsub.forEach((fn) => { try { fn(); } catch (e) {} });
         S.unsub = [];
         Object.assign(S, {
@@ -2068,7 +2097,7 @@
         $("#admin-badge").hidden = !S.isAdmin;
         $("#nav-admin").hidden = !S.isAdmin;
         $$(".nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === S.tab));
-        ["discover", "posts", "likes", "profile", "admin"].forEach((x) => ($("#tab-" + x).hidden = x !== S.tab));
+        ["discover", "posts", "likes", "chats", "profile", "admin"].forEach((x) => ($("#tab-" + x).hidden = x !== S.tab));
         $("#btn-filters").hidden = !(S.tab === "discover" && !$("#screen-main").hidden);
 
         const incoming = incomingList().length;
@@ -2091,6 +2120,7 @@
         if (S.tab === "discover") renderFeed(force);
         if (S.tab === "posts") renderPosts();
         if (S.tab === "likes") renderLikes();
+        if (S.tab === "chats") renderChats(force);
         if (S.tab === "profile") renderProfile();
         if (S.tab === "admin") renderAdmin();
       }
@@ -3053,6 +3083,7 @@
          15b. ЧАТ МЕЖДУ МЭТЧАМИ
       ===================================================================== */
       S.chat = null;
+      S.chatPreviews = new Map();
       const chatIdWith = (uid) => [S.uid, uid].sort().join("_");
 
       function openChat(uid) {
@@ -3073,7 +3104,14 @@
         S.chat.unsub = onSnapshot(qy, (snap) => {
           const list = [];
           snap.forEach((d) => list.push(d.data()));
-          if (S.chat) { S.chat.msgs = list; renderChatMessages(); }
+          if (S.chat) {
+            S.chat.msgs = list;
+            renderChatMessages();
+            if (list.length) {
+              const last = list[list.length - 1];
+              S.chatPreviews.set(S.chat.uid, { text: last.text, ts: last.ts, senderUid: last.senderUid });
+            }
+          }
         }, (err) => toast(fbErr(err)));
         setTimeout(() => $("#chat-input").focus(), 120);
       }
@@ -3114,6 +3152,63 @@
         if (S.chat && S.chat.unsub) { try { S.chat.unsub(); } catch (e) {} }
         S.chat = null;
         closeModal("modal-chat");
+        if (S.tab === "chats") renderChats(false);
+      }
+
+      /* ---- Список переписок (inbox) ---- */
+      function relTime(ts) {
+        if (!ts) return "";
+        const d = new Date(ts), now = new Date();
+        if (d.toDateString() === now.toDateString()) return d.toTimeString().slice(0, 5);
+        return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+      }
+
+      async function loadChatPreviews(uids) {
+        await Promise.all(uids.map(async (uid) => {
+          try {
+            const qy = query(collection(db, C.chats, chatIdWith(uid), "messages"), orderBy("ts", "desc"), limit(1));
+            const snap = await getDocs(qy);
+            let last = null;
+            snap.forEach((d) => (last = d.data()));
+            if (last) S.chatPreviews.set(uid, { text: last.text, ts: last.ts, senderUid: last.senderUid });
+            else S.chatPreviews.delete(uid);
+          } catch (e) {}
+        }));
+      }
+
+      async function renderChats(force = false) {
+        const box = $("#chats-list");
+        if (!box) return;
+        const matches = [...matchUids()].map((u) => S.profiles.get(u)).filter((pp) => pp && !pp.banned);
+        const draw = () => {
+          if (!matches.length) {
+            box.innerHTML = `<div class="item"><p class="small muted text-center" style="margin:6px 0">${esc(t("chats.empty"))}</p></div>`;
+            return;
+          }
+          const pr = (uid) => S.chatPreviews.get(uid);
+          const sorted = matches.slice().sort((a, b) => {
+            const ta = pr(a.uid)?.ts || 0, tb = pr(b.uid)?.ts || 0;
+            if (ta || tb) return tb - ta;
+            return a.name.localeCompare(b.name);
+          });
+          box.innerHTML = sorted.map((pp) => {
+            const c = pr(pp.uid);
+            const preview = c ? (c.senderUid === S.uid ? t("chats.you") + " " : "") + c.text : t("chats.start");
+            const time = c ? relTime(c.ts) : "";
+            return `
+              <div class="item conv" data-action="open-chat" data-uid="${esc(pp.uid)}">
+                <div class="person">${img(pp)}<div class="meta">
+                  <div class="conv-head"><h4>${esc(pp.name)}, ${esc(pp.age)}</h4><span class="conv-time">${esc(time)}</span></div>
+                  <p class="conv-prev${c ? "" : " muted"}">${esc(preview)}</p>
+                </div></div>
+              </div>`;
+          }).join("");
+        };
+        draw();
+        if (force && matches.length) {
+          await loadChatPreviews(matches.map((pp) => pp.uid));
+          if (S.tab === "chats") draw();
+        }
       }
 
       document.getElementById("chat-form").addEventListener("submit", (e) => {
