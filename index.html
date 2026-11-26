@@ -443,6 +443,16 @@
       .conv-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
       .conv-prev { margin: 3px 0 0; font-size: 12.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .conv-prev.muted { color: var(--muted); }
+      .conv.unread .conv-prev { color: var(--text); font-weight: 700; }
+      .conv-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+      .person[data-action], .chat-head-open { cursor: pointer; }
+      .pv-photo { width: 100%; aspect-ratio: 1/1; max-height: 320px; object-fit: cover; border-radius: 18px; background: var(--input); }
+      .pv-name { margin: 12px 0 2px; font-size: 20px; }
+      .pv-sub { margin: 0; color: var(--muted); font-size: 13px; }
+      .pv-sec { margin: 14px 0 6px; font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+      .pv-bio { margin: 0; font-size: 14px; line-height: 1.5; }
+      .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+      .sheet-head h3 { margin: 0; }
       .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-20px); z-index: 80; max-width: 90vw; padding: 10px 16px; border-radius: 99px; background: var(--elev); color: var(--text); border: 1px solid var(--accent); box-shadow: var(--shadow); font-size: 12.5px; font-weight: 600; text-align: center; opacity: 0; pointer-events: none; transition: all 0.25s; }
       .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -761,6 +771,7 @@
               <span data-i18n="nav.likes"></span>
             </button>
             <button class="nav-btn" data-action="tab" data-tab="chats">
+              <span class="dot-badge" id="badge-chats" hidden>0</span>
               <svg fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.84L3 20l1.3-3.9A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
               <span data-i18n="nav.chats"></span>
             </button>
@@ -905,12 +916,23 @@
       </div>
 
       <!-- ================= ЧАТ (только между мэтчами) ================= -->
+      <!-- ================= ПРОФИЛЬ АДРУГОГО ================= -->
+      <div class="modal sheet" id="modal-profile" hidden>
+        <div class="modal-box">
+          <div class="sheet-head">
+            <h3 data-i18n="pv.title"></h3>
+            <button class="icon-btn" data-action="close-profile" aria-label="close">✕</button>
+          </div>
+          <div id="profile-view"></div>
+        </div>
+      </div>
+
       <div class="modal chat-modal" id="modal-chat" hidden>
         <div class="modal-box chat-box">
           <div class="chat-head">
             <button class="chat-icon" data-action="close-chat" aria-label="back">←</button>
-            <img id="chat-photo" class="chat-avatar" alt="" />
-            <div class="chat-head-meta">
+            <img id="chat-photo" class="chat-avatar" data-action="view-profile" alt="" />
+            <div class="chat-head-meta chat-head-open" data-action="view-profile">
               <h4 id="chat-name"></h4>
               <p id="chat-sub" class="tiny muted" style="margin:0"></p>
             </div>
@@ -960,6 +982,7 @@
           reports: "u_reports",
           admins: "u_admins",
           chats: "u_chats",
+          presence: "u_presence",
         },
       };
 
@@ -1130,6 +1153,7 @@
           "chat.block": "Заблокировать", "chat.blockTitle": "Заблокировать?", "chat.blockText": "Мэтч будет удалён, и человек больше не появится в ленте. Продолжить?", "chat.blockOk": "Заблокировать", "toast.blocked": "Пользователь заблокирован",
           "nav.chats": "Чат", "chats.title": "Сообщения", "chats.sub": "Люди, с которыми вы общаетесь",
           "chats.empty": "Пока нет чатов. Найдите мэтч, чтобы начать общение 💬", "chats.you": "Вы:", "chats.start": "Новый мэтч — напишите первым 👋",
+          "pv.title": "Профиль", "pv.goals": "Цели", "pv.about": "О себе", "pv.skills": "Навыки", "pv.contacts": "Контакты", "pv.locked": "Контакты откроются после взаимного лайка",
           "toast.skipped": "Пропущено",
 
           "profile.noneTitle": "Анкеты пока нет",
@@ -1143,6 +1167,7 @@
           "admin.reportFrom": "от {name} · {time}", "admin.unknown": "неизвестно", "admin.deleted": "Анкета удалена",
           "btn.dismiss": "Отклонить", "btn.ban": "Забанить", "admin.noReports": "Жалоб нет 🎉",
           "admin.nobody": "Никого не найдено", "admin.goals": "Цели:", "admin.reportsN": "жалоб: {n}",
+          "admin.lastSeen": "Был(а):", "admin.onlineNow": "вы сейчас онлайн",
           "admin.you": "Это вы", "btn.unban": "✓ Разбанить", "btn.banIcon": "⛔ Забанить",
           "toast.banned": "Пользователь заблокирован", "toast.unbanned": "Пользователь разблокирован",
           "toast.userDeleted": "Анкета и связанные данные удалены",
@@ -1318,6 +1343,7 @@
           "chat.block": "Бұғаттау", "chat.blockTitle": "Бұғаттау керек пе?", "chat.blockText": "Мэтч жойылады және бұл адам лентада қайта көрінбейді. Жалғастырамыз ба?", "chat.blockOk": "Бұғаттау", "toast.blocked": "Пайдаланушы бұғатталды",
           "nav.chats": "Чат", "chats.title": "Хабарламалар", "chats.sub": "Сөйлескен адамдарың",
           "chats.empty": "Әзірге чат жоқ. Сөйлесу үшін мэтч тап 💬", "chats.you": "Сен:", "chats.start": "Жаңа мэтч — бірінші боп жаз 👋",
+          "pv.title": "Профиль", "pv.goals": "Мақсаттар", "pv.about": "Өзі туралы", "pv.skills": "Дағдылар", "pv.contacts": "Байланыс", "pv.locked": "Байланыс өзара лайктан кейін ашылады",
           "toast.skipped": "Өткізілді",
 
           "profile.noneTitle": "Әзірге анкета жоқ",
@@ -1331,6 +1357,7 @@
           "admin.reportFrom": "{name} жіберді · {time}", "admin.unknown": "белгісіз", "admin.deleted": "Анкета жойылған",
           "btn.dismiss": "Қабылдамау", "btn.ban": "Бұғаттау", "admin.noReports": "Шағым жоқ 🎉",
           "admin.nobody": "Ешкім табылмады", "admin.goals": "Мақсаттары:", "admin.reportsN": "шағым: {n}",
+          "admin.lastSeen": "Соңғы рет:", "admin.onlineNow": "қазір онлайнсың",
           "admin.you": "Бұл сіз", "btn.unban": "✓ Бұғаттан шығару", "btn.banIcon": "⛔ Бұғаттау",
           "toast.banned": "Пайдаланушы бұғатталды", "toast.unbanned": "Пайдаланушы бұғаттан шығарылды",
           "toast.userDeleted": "Анкета және байланысты деректер жойылды",
@@ -1506,6 +1533,7 @@
           "chat.block": "Block", "chat.blockTitle": "Block this person?", "chat.blockText": "The match will be removed and they won\u2019t appear in your feed again. Continue?", "chat.blockOk": "Block", "toast.blocked": "User blocked",
           "nav.chats": "Chats", "chats.title": "Messages", "chats.sub": "People you\u2019re talking to",
           "chats.empty": "No chats yet. Get a match to start talking 💬", "chats.you": "You:", "chats.start": "New match — say hi first 👋",
+          "pv.title": "Profile", "pv.goals": "Goals", "pv.about": "About", "pv.skills": "Skills", "pv.contacts": "Contacts", "pv.locked": "Contacts open after a mutual like",
           "toast.skipped": "Skipped",
 
           "profile.noneTitle": "No profile yet",
@@ -1519,6 +1547,7 @@
           "admin.reportFrom": "from {name} · {time}", "admin.unknown": "unknown", "admin.deleted": "Profile deleted",
           "btn.dismiss": "Dismiss", "btn.ban": "Ban", "admin.noReports": "No reports 🎉",
           "admin.nobody": "No one found", "admin.goals": "Goals:", "admin.reportsN": "reports: {n}",
+          "admin.lastSeen": "Last seen:", "admin.onlineNow": "you\u2019re online now",
           "admin.you": "That's you", "btn.unban": "✓ Unban", "btn.banIcon": "⛔ Ban",
           "toast.banned": "User banned", "toast.unbanned": "User unbanned",
           "toast.userDeleted": "Profile and related data deleted",
@@ -1642,6 +1671,7 @@
         post: (id) => doc(db, C.posts, id),
         report: (id) => doc(db, C.reports, id),
         admin: (uid) => doc(db, C.admins, uid),
+        presence: (uid) => doc(db, C.presence, uid),
       };
 
       const S = {
@@ -1902,6 +1932,13 @@
         showScreen("screen-verify");
       }
 
+      async function touchPresence() {
+        if (!S.uid) return;
+        try { await setDoc(ref.presence(S.uid), { lastSeen: Date.now() }); } catch (e) {}
+      }
+      window.addEventListener("focus", touchPresence);
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) touchPresence(); });
+
       async function enterApp(user) {
         showScreen("screen-loading");
         $("#loading-text").textContent = t("loading.profiles");
@@ -1912,6 +1949,7 @@
           S.isAdmin = false;
         }
         startListeners();
+        touchPresence();
       }
 
       onAuthStateChanged(auth, async (user) => {
@@ -1933,6 +1971,9 @@
       function teardown() {
         if (S.chat && S.chat.unsub) { try { S.chat.unsub(); } catch (e) {} }
         S.chat = null;
+        if (S.chatListeners) { S.chatListeners.forEach((fn) => { try { fn(); } catch (e) {} }); S.chatListeners = null; }
+        S.chatSeeded = new Set();
+        S.chatReads = null;
         if (S.chatPreviews) S.chatPreviews.clear();
         S.unsub.forEach((fn) => { try { fn(); } catch (e) {} });
         S.unsub = [];
@@ -1941,6 +1982,8 @@
           loaded: { profiles: false, priv: false, out: false, inc: false },
           profiles: new Map(), myPrivate: null, outgoing: new Map(), incoming: new Map(),
           posts: [], allLikes: [], allPrivate: new Map(), reports: [], contactsCache: new Map(), knownMatches: null,
+        presence: new Map(),
+        chatSeeded: new Set(), chatListeners: null, chatReads: null,
           editing: false, formOpen: false, feedSig: "", lastSwipe: null, undoUid: null, tab: "discover",
         });
         $$(".modal").forEach((m) => (m.hidden = true));
@@ -2038,6 +2081,14 @@
               if (S.tab === "admin") renderAdmin();
             }, listenError("admin-reports"))
           );
+          S.unsub.push(
+            onSnapshot(collection(db, C.presence), (snap) => {
+              const m = new Map();
+              snap.forEach((d) => m.set(d.id, d.data()));
+              S.presence = m;
+              if (S.tab === "admin") renderAdmin();
+            }, listenError("admin-presence"))
+          );
         }
       }
 
@@ -2052,6 +2103,7 @@
       function onLikesChanged() {
         if (!(S.loaded.out && S.loaded.inc)) return;
         const now = matchUids();
+        syncChatListeners();
         if (S.knownMatches) {
           for (const uid of now) {
             if (!S.knownMatches.has(uid)) {
@@ -2104,6 +2156,10 @@
         const badge = $("#badge-likes");
         badge.textContent = incoming;
         badge.hidden = incoming === 0;
+
+        const uc = unreadCount();
+        const cb = $("#badge-chats");
+        if (cb) { cb.textContent = uc; cb.hidden = uc === 0; }
 
         const fc = activeFilterCount();
         $("#filters-count").textContent = fc;
@@ -2459,6 +2515,7 @@
               <span class="glass">🎓 ${esc(courseLabel(p.course))} · ${esc(p.group)}</span>
               <div class="card-tools">
                 ${adminTools}
+<button class="glass" data-action="view-profile" data-uid="${esc(p.uid)}" title="${esc(t("pv.title"))}">ℹ️</button>
                 <button class="glass" data-action="report" data-uid="${esc(p.uid)}" title="${esc(t("tip.report"))}">⚑</button>
               </div>
             </div>
@@ -2854,7 +2911,7 @@
                 const g = me ? sharedGoals(me, p) : [];
                 return `
                 <div class="item">
-                  <div class="person">${img(p)}<div class="meta">
+                  <div class="person" data-action="view-profile" data-uid="${esc(p.uid)}">${img(p)}<div class="meta">
                     <h4>${esc(p.name)}, ${esc(p.age)}</h4>
                     <p>${esc(courseLabel(p.course))} · ${esc(p.group)} · ${esc(p.faculty)}</p>
                     <div class="goal-row" style="margin-top:6px">${g.map(goalBadge).join("")}</div>
@@ -2882,7 +2939,7 @@
                 const msg = S.incoming.get(p.uid)?.message || S.outgoing.get(p.uid)?.message || "";
                 return `
                 <div class="item">
-                  <div class="person">${img(p)}<div class="meta">
+                  <div class="person" data-action="view-profile" data-uid="${esc(p.uid)}">${img(p)}<div class="meta">
                     <h4>${esc(p.name)}, ${esc(p.age)}</h4>
                     <p>${esc(courseLabel(p.course))} · ${esc(p.group)}</p>
                   </div>
@@ -2983,6 +3040,13 @@
         renderAdmin();
       });
 
+      function lastSeenLabel(p) {
+        if (p.uid === S.uid) return "\ud83d\udfe2 " + t("admin.onlineNow");
+        const pr = S.presence.get(p.uid);
+        if (!pr || !pr.lastSeen) return t("admin.lastSeen") + " \u2014";
+        return t("admin.lastSeen") + " " + timeAgo(pr.lastSeen);
+      }
+
       function renderAdmin() {
         if (!S.isAdmin) return;
         const profiles = [...S.profiles.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -3036,10 +3100,11 @@
                 const rc = S.reports.filter((r) => r.targetUid === p.uid).length;
                 return `
                 <div class="item ${p.banned ? "banned" : ""}">
-                  <div class="person">${img(p)}<div class="meta">
+                  <div class="person" data-action="view-profile" data-uid="${esc(p.uid)}">${img(p)}<div class="meta">
                     <h4>${esc(p.name)}, ${esc(p.age)} ${p.banned ? "· ⛔" : ""}</h4>
                     <p>${esc(courseLabel(p.course))} · ${esc(p.group)} · ${esc(p.faculty)}</p>
                     <p>${esc(t("admin.goals"))} ${(p.goals || []).map((g) => GOAL_EMOJI[g] || "").join(" ")} ${rc ? `· <span style="color:var(--danger)">${esc(t("admin.reportsN", { n: rc }))}</span>` : ""}</p>
+                    <p class="tiny muted">${lastSeenLabel(p)}</p>
                   </div></div>
                   ${p.bio ? `<p class="small muted" style="margin:0">${esc(p.bio)}</p>` : ""}
                   <div class="contacts">${contactsHtml(S.allPrivate.get(p.uid))}</div>
@@ -3100,6 +3165,8 @@
         $("#chat-messages").innerHTML = "";
         $("#chat-input").value = "";
         openModal("modal-chat");
+        if ("Notification" in window && Notification.permission === "default") { try { Notification.requestPermission(); } catch (e) {} }
+        markRead(uid);
         const qy = query(collection(db, C.chats, S.chat.id, "messages"), orderBy("ts", "asc"), limit(300));
         S.chat.unsub = onSnapshot(qy, (snap) => {
           const list = [];
@@ -3110,6 +3177,7 @@
             if (list.length) {
               const last = list[list.length - 1];
               S.chatPreviews.set(S.chat.uid, { text: last.text, ts: last.ts, senderUid: last.senderUid });
+              markRead(S.chat.uid);
             }
           }
         }, (err) => toast(fbErr(err)));
@@ -3195,21 +3263,122 @@
             const c = pr(pp.uid);
             const preview = c ? (c.senderUid === S.uid ? t("chats.you") + " " : "") + c.text : t("chats.start");
             const time = c ? relTime(c.ts) : "";
+            const unread = isUnread(pp.uid);
             return `
-              <div class="item conv" data-action="open-chat" data-uid="${esc(pp.uid)}">
+              <div class="item conv${unread ? " unread" : ""}" data-action="open-chat" data-uid="${esc(pp.uid)}">
                 <div class="person">${img(pp)}<div class="meta">
-                  <div class="conv-head"><h4>${esc(pp.name)}, ${esc(pp.age)}</h4><span class="conv-time">${esc(time)}</span></div>
+                  <div class="conv-head"><h4>${esc(pp.name)}, ${esc(pp.age)}</h4>${unread ? `<span class="conv-dot"></span>` : ""}<span class="conv-time">${esc(time)}</span></div>
                   <p class="conv-prev${c ? "" : " muted"}">${esc(preview)}</p>
                 </div></div>
               </div>`;
           }).join("");
         };
         draw();
-        if (force && matches.length) {
-          await loadChatPreviews(matches.map((pp) => pp.uid));
-          if (S.tab === "chats") draw();
+        if (force) syncChatListeners();
+      }
+
+      /* ---- Уведомления + непрочитанные ---- */
+      function readsKey() { return "juptas_reads_" + S.uid; }
+      function getReads() {
+        if (!S.chatReads) {
+          try { S.chatReads = JSON.parse(localStorage.getItem(readsKey()) || "{}"); } catch (e) { S.chatReads = {}; }
+        }
+        return S.chatReads;
+      }
+      function markRead(uid) {
+        const c = S.chatPreviews.get(uid);
+        getReads()[uid] = Math.max(getReads()[uid] || 0, c ? c.ts : Date.now());
+        try { localStorage.setItem(readsKey(), JSON.stringify(getReads())); } catch (e) {}
+        renderChrome();
+        if (S.tab === "chats") renderChats();
+      }
+      function isUnread(uid) {
+        const c = S.chatPreviews.get(uid);
+        return !!(c && c.senderUid !== S.uid && c.ts > (getReads()[uid] || 0));
+      }
+      function unreadCount() {
+        let n = 0;
+        matchUids().forEach((uid) => { if (isUnread(uid)) n++; });
+        return n;
+      }
+      function notifyMessage(uid, text) {
+        const pp = S.profiles.get(uid);
+        const name = pp ? pp.name : "JUPTAS";
+        toast(`💬 ${name}: ${text.length > 40 ? text.slice(0, 40) + "…" : text}`);
+        if (document.hidden && "Notification" in window && Notification.permission === "granted") {
+          try { new Notification(name, { body: text, tag: "juptas-" + uid }); } catch (e) {}
         }
       }
+      function chatListenerFor(uid) {
+        const id = chatIdWith(uid);
+        return onSnapshot(
+          query(collection(db, C.chats, id, "messages"), orderBy("ts", "desc"), limit(1)),
+          (snap) => {
+            let last = null;
+            snap.forEach((d) => (last = d.data()));
+            const prevTs = S.chatPreviews.get(uid)?.ts || 0;
+            if (last) S.chatPreviews.set(uid, { text: last.text, ts: last.ts, senderUid: last.senderUid });
+            else S.chatPreviews.delete(uid);
+            const seeded = S.chatSeeded.has(uid);
+            if (!seeded) S.chatSeeded.add(uid);
+            else if (last && last.senderUid !== S.uid && last.ts > prevTs) {
+              if (S.chat && S.chat.uid === uid) markRead(uid);
+              else notifyMessage(uid, last.text);
+            }
+            renderChrome();
+            if (S.tab === "chats") renderChats();
+          },
+          () => {}
+        );
+      }
+      function syncChatListeners() {
+        if (!S.chatListeners) S.chatListeners = new Map();
+        const now = matchUids();
+        now.forEach((uid) => { if (!S.chatListeners.has(uid)) S.chatListeners.set(uid, chatListenerFor(uid)); });
+        [...S.chatListeners.keys()].forEach((uid) => {
+          if (!now.has(uid)) {
+            try { S.chatListeners.get(uid)(); } catch (e) {}
+            S.chatListeners.delete(uid);
+            S.chatSeeded.delete(uid);
+          }
+        });
+      }
+
+      /* ---- Просмотр чужого профиля ---- */
+      function openProfile(uid) {
+        const p = S.profiles.get(uid);
+        if (!p) return;
+        const me = myProfile();
+        const matched = matchUids().has(uid);
+        const mySkills = new Set(me?.skills || []);
+        const goals = (p.goals || []).map((g) => goalBadge(g)).join("");
+        const skills = (p.skills || []).length
+          ? `<div class="skill-row">${(p.skills || []).map((sk) => `<span class="skill-tag ${mySkills.has(sk) ? "common" : ""}">${esc(skillLabel(sk))}</span>`).join("")}</div>`
+          : `<p class="small muted" style="margin:0">—</p>`;
+        const contacts = matched
+          ? `<div class="pv-sec">${esc(t("pv.contacts"))}</div><div class="contacts" data-contacts="${esc(uid)}"><p class="small muted" style="margin:0">${esc(t("contacts.loading"))}</p></div>`
+          : `<div class="pv-sec">${esc(t("pv.contacts"))}</div><p class="small muted" style="margin:0">🔒 ${esc(t("pv.locked"))}</p>`;
+        const chatBtn = matched
+          ? `<button class="btn btn-primary full" data-action="open-chat" data-uid="${esc(uid)}" style="margin-top:14px">💬 ${esc(t("btn.chat"))}</button>`
+          : "";
+        $("#profile-view").innerHTML = `
+          ${img(p, "pv-photo")}
+          <h2 class="pv-name">${esc(p.name)}, ${esc(p.age)}</h2>
+          <p class="pv-sub">${esc(courseLabel(p.course))} · ${esc(p.group)} · ${esc(p.faculty)}</p>
+          <div class="pv-sec">${esc(t("pv.goals"))}</div>
+          <div class="goal-row">${goals || `<span class="small muted">—</span>`}</div>
+          ${p.bio ? `<div class="pv-sec">${esc(t("pv.about"))}</div><p class="pv-bio">${esc(p.bio)}</p>` : ""}
+          <div class="pv-sec">${esc(t("pv.skills"))}</div>
+          ${skills}
+          ${contacts}
+          ${chatBtn}`;
+        openModal("modal-profile");
+        if (matched) {
+          const el = $("#profile-view [data-contacts]");
+          if (el) loadContacts(uid).then((c) => { el.innerHTML = contactsHtml(c); });
+        }
+      }
+      function closeProfile() { closeModal("modal-profile"); }
 
       document.getElementById("chat-form").addEventListener("submit", (e) => {
         e.preventDefault();
@@ -3303,6 +3472,8 @@
           ),
         "copy": (el) => copyText(el.dataset.value),
         "open-chat": (el) => openChat(el.dataset.uid),
+        "view-profile": (el) => openProfile(el.dataset.uid || (S.chat && S.chat.uid)),
+        "close-profile": () => closeProfile(),
         "close-chat": () => closeChat(),
         "chat-report": () => { if (S.chat) openReport(S.chat.uid); },
         "chat-block": () => {

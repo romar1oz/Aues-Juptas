@@ -177,6 +177,15 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // ---------- Присутствие: кто когда заходил (видит только админ и сам владелец) ----------
+    match /u_presence/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['lastSeen'])
+        && request.resource.data.lastSeen is int;
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
     // ---------- Список админов: свою запись видит только сам админ ----------
     match /u_admins/{uid} {
       allow read: if isOwner(uid);
