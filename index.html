@@ -756,7 +756,13 @@
               <div class="chips" id="admin-filter">
                 <button class="chip active" data-action="admin-filter" data-value="all" data-i18n="filter.all"></button>
                 <button class="chip" data-action="admin-filter" data-value="active" data-i18n="filter.active"></button>
+                <button class="chip" data-action="admin-filter" data-value="online" data-i18n="filter.online"></button>
                 <button class="chip" data-action="admin-filter" data-value="banned" data-i18n="filter.banned"></button>
+              </div>
+              <div class="chips" id="admin-sort">
+                <button class="chip active" data-action="admin-sort" data-value="new" data-i18n="admin.sortNew"></button>
+                <button class="chip" data-action="admin-sort" data-value="seen" data-i18n="admin.sortSeen"></button>
+                <button class="chip" data-action="admin-sort" data-value="reports" data-i18n="admin.sortReports"></button>
               </div>
               <div class="stack" id="admin-users"></div>
             </div>
@@ -993,6 +999,7 @@
           admins: "u_admins",
           chats: "u_chats",
           presence: "u_presence",
+          emails: "u_emails",
         },
       };
 
@@ -1079,7 +1086,7 @@
           "likes.matches": "Мэтчи", "likes.matchesSub": "Симпатия взаимна, контакты открыты",
           "admin.title": "🛡 Админ-панель", "admin.sub": "Жалобы и модерация анкет",
           "admin.reports": "Жалобы", "admin.users": "Пользователи", "admin.search": "Поиск: имя, группа, факультет, Telegram, Instagram",
-          "filter.all": "Все", "filter.active": "Активные", "filter.banned": "Забаненные",
+          "filter.all": "Все", "filter.active": "Активные", "filter.online": "Онлайн", "filter.banned": "Забаненные",
           "nav.discover": "Лента", "nav.posts": "Команды", "nav.likes": "Симпатии", "nav.profile": "Профиль", "nav.admin": "Админ",
 
           "msg.kicker": "Лайк с сообщением 💌", "msg.kickerPost": "Отклик на объявление 📌",
@@ -1172,7 +1179,7 @@
           "profile.noContacts": "Не указаны", "btn.edit": "Редактировать анкету", "btn.deleteAcc": "Удалить аккаунт",
           "toast.accDeleted": "Аккаунт и все данные удалены",
 
-          "admin.statProfiles": "Анкет", "admin.statBan": "Бан", "admin.statMatches": "Мэтчей",
+          "admin.statProfiles": "Анкет", "admin.statOnline": "Онлайн", "admin.statBan": "Бан", "admin.statMatches": "Мэтчей", "admin.sortNew": "Новые", "admin.sortSeen": "По активности", "admin.sortReports": "По жалобам",
           "admin.statReports": "Жалоб", "admin.statPosts": "Постов",
           "admin.reportFrom": "от {name} · {time}", "admin.unknown": "неизвестно", "admin.deleted": "Анкета удалена",
           "btn.dismiss": "Отклонить", "btn.ban": "Забанить", "admin.noReports": "Жалоб нет 🎉",
@@ -1270,7 +1277,7 @@
           "likes.matches": "Мэтчтер", "likes.matchesSub": "Симпатия өзара, байланыс ашық",
           "admin.title": "🛡 Әкімші панелі", "admin.sub": "Шағымдар және анкеталарды модерациялау",
           "admin.reports": "Шағымдар", "admin.users": "Пайдаланушылар", "admin.search": "Іздеу: аты, тобы, факультеті, Telegram, Instagram",
-          "filter.all": "Барлығы", "filter.active": "Белсенді", "filter.banned": "Бұғатталған",
+          "filter.all": "Барлығы", "filter.active": "Белсенді", "filter.online": "Онлайн", "filter.banned": "Бұғатталған",
           "nav.discover": "Таспа", "nav.posts": "Командалар", "nav.likes": "Симпатиялар", "nav.profile": "Профиль", "nav.admin": "Әкімші",
 
           "msg.kicker": "Хабарламасы бар лайк 💌", "msg.kickerPost": "Хабарландыруға жауап 📌",
@@ -1363,7 +1370,7 @@
           "profile.noContacts": "Көрсетілмеген", "btn.edit": "Анкетаны өңдеу", "btn.deleteAcc": "Аккаунтты жою",
           "toast.accDeleted": "Аккаунт пен барлық деректер жойылды",
 
-          "admin.statProfiles": "Анкета", "admin.statBan": "Бан", "admin.statMatches": "Мэтч",
+          "admin.statProfiles": "Анкета", "admin.statOnline": "Онлайн", "admin.statBan": "Бан", "admin.statMatches": "Мэтч", "admin.sortNew": "Жаңа", "admin.sortSeen": "Белсенділік", "admin.sortReports": "Шағым бойынша",
           "admin.statReports": "Шағым", "admin.statPosts": "Пост",
           "admin.reportFrom": "{name} жіберді · {time}", "admin.unknown": "белгісіз", "admin.deleted": "Анкета жойылған",
           "btn.dismiss": "Қабылдамау", "btn.ban": "Бұғаттау", "admin.noReports": "Шағым жоқ 🎉",
@@ -1461,7 +1468,7 @@
           "likes.matches": "Matches", "likes.matchesSub": "It's mutual — contacts unlocked",
           "admin.title": "🛡 Admin panel", "admin.sub": "Reports and moderation",
           "admin.reports": "Reports", "admin.users": "Users", "admin.search": "Search: name, group, faculty, Telegram, Instagram",
-          "filter.all": "All", "filter.active": "Active", "filter.banned": "Banned",
+          "filter.all": "All", "filter.active": "Active", "filter.online": "Online", "filter.banned": "Banned",
           "nav.discover": "Discover", "nav.posts": "Teams", "nav.likes": "Likes", "nav.profile": "Profile", "nav.admin": "Admin",
 
           "msg.kicker": "Like with a message 💌", "msg.kickerPost": "Reply to a post 📌",
@@ -1554,7 +1561,7 @@
           "profile.noContacts": "Not set", "btn.edit": "Edit profile", "btn.deleteAcc": "Delete account",
           "toast.accDeleted": "Account and all data deleted",
 
-          "admin.statProfiles": "Profiles", "admin.statBan": "Banned", "admin.statMatches": "Matches",
+          "admin.statProfiles": "Profiles", "admin.statOnline": "Online", "admin.statBan": "Banned", "admin.statMatches": "Matches", "admin.sortNew": "Newest", "admin.sortSeen": "By activity", "admin.sortReports": "By reports",
           "admin.statReports": "Reports", "admin.statPosts": "Posts",
           "admin.reportFrom": "from {name} · {time}", "admin.unknown": "unknown", "admin.deleted": "Profile deleted",
           "btn.dismiss": "Dismiss", "btn.ban": "Ban", "admin.noReports": "No reports 🎉",
@@ -1685,6 +1692,7 @@
         report: (id) => doc(db, C.reports, id),
         admin: (uid) => doc(db, C.admins, uid),
         presence: (uid) => doc(db, C.presence, uid),
+        emails: (uid) => doc(db, C.emails, uid),
       };
 
       const S = {
@@ -1723,6 +1731,7 @@
         postKindFilter: "all",
         adminFilter: "all",
         adminQuery: "",
+        adminSort: "new",
         confirmFn: null,
       };
 
@@ -1979,6 +1988,7 @@
         }
         startListeners();
         touchPresence();
+        if (user.email) setDoc(ref.emails(user.uid), { email: user.email }).catch(() => {});
         if (S.hbTimer) clearInterval(S.hbTimer);
         S.hbTimer = setInterval(() => { if (!document.hidden) touchPresence(); }, 60000);
       }
@@ -2016,7 +2026,7 @@
           loaded: { profiles: false, priv: false, out: false, inc: false },
           profiles: new Map(), myPrivate: null, outgoing: new Map(), incoming: new Map(),
           posts: [], allLikes: [], allPrivate: new Map(), reports: [], contactsCache: new Map(), knownMatches: null,
-        presence: new Map(),
+        presence: new Map(), emails: new Map(),
         chatSeeded: new Set(), chatListeners: null, chatReads: null,
           editing: false, formOpen: false, feedSig: "", lastSwipe: null, undoUid: null, tab: "discover",
         });
@@ -2122,6 +2132,14 @@
               S.presence = m;
               if (S.tab === "admin") renderAdmin();
             }, (err) => console.warn("presence listener (rules not published yet?)", err?.code))
+          );
+          S.unsub.push(
+            onSnapshot(collection(db, C.emails), (snap) => {
+              const m = new Map();
+              snap.forEach((d) => m.set(d.id, (d.data() || {}).email || ""));
+              S.emails = m;
+              if (S.tab === "admin") renderAdmin();
+            }, (err) => console.warn("emails listener (rules not published yet?)", err?.code))
           );
         }
       }
@@ -3081,8 +3099,13 @@
         renderAdmin();
       });
 
+      function onlineNow(uid) {
+        const pr = S.presence.get(uid);
+        return !!(pr && pr.lastSeen && Date.now() - pr.lastSeen < 90000);
+      }
       function lastSeenLabel(p) {
         if (p.uid === S.uid) return "\ud83d\udfe2 " + t("admin.onlineNow");
+        if (onlineNow(p.uid)) return "\ud83d\udfe2 " + t("chat.online");
         const pr = S.presence.get(p.uid);
         if (!pr || !pr.lastSeen) return t("admin.lastSeen") + " \u2014";
         return t("admin.lastSeen") + " " + timeAgo(pr.lastSeen);
@@ -3090,7 +3113,12 @@
 
       function renderAdmin() {
         if (!S.isAdmin) return;
-        const profiles = [...S.profiles.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        const sortFns = {
+          new: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+          seen: (a, b) => ((S.presence.get(b.uid) || {}).lastSeen || 0) - ((S.presence.get(a.uid) || {}).lastSeen || 0),
+          reports: (a, b) => S.reports.filter((r) => r.targetUid === b.uid).length - S.reports.filter((r) => r.targetUid === a.uid).length,
+        };
+        const profiles = [...S.profiles.values()].sort(sortFns[S.adminSort] || sortFns.new);
         const banned = profiles.filter((p) => p.banned).length;
 
         const likeSet = new Set(S.allLikes.filter((l) => l.type === "like").map((l) => `${l.fromUid}>${l.toUid}`));
@@ -3100,9 +3128,10 @@
         });
 
         const stat = (v, key) => `<div class="stat"><b>${v}</b><span>${esc(t(key))}</span></div>`;
+        const onlineN = profiles.filter((p) => onlineNow(p.uid)).length;
         $("#admin-stats").innerHTML =
-          stat(profiles.length, "admin.statProfiles") + stat(banned, "admin.statBan") + stat(pairs.size, "admin.statMatches") +
-          stat(S.reports.length, "admin.statReports") + stat(S.posts.length, "admin.statPosts");
+          stat(profiles.length, "admin.statProfiles") + stat(onlineN, "admin.statOnline") + stat(banned, "admin.statBan") +
+          stat(pairs.size, "admin.statMatches") + stat(S.reports.length, "admin.statReports") + stat(S.posts.length, "admin.statPosts");
 
         $("#reports-count").textContent = S.reports.length;
         $("#admin-reports").innerHTML = S.reports.length
@@ -3131,8 +3160,9 @@
         const filtered = profiles.filter((p) => {
           if (S.adminFilter === "active" && p.banned) return false;
           if (S.adminFilter === "banned" && !p.banned) return false;
+          if (S.adminFilter === "online" && !onlineNow(p.uid)) return false;
           const pv = S.allPrivate.get(p.uid) || {};
-          if (q && !`${p.name} ${p.group} ${p.faculty} ${p.course} ${pv.telegram || ""} ${pv.instagram || ""}`.toLowerCase().includes(q)) return false;
+          if (q && !`${p.name} ${p.group} ${p.faculty} ${p.course} ${pv.telegram || ""} ${pv.instagram || ""} ${S.emails.get(p.uid) || ""}`.toLowerCase().includes(q)) return false;
           return true;
         });
         $("#admin-users").innerHTML = filtered.length
@@ -3148,7 +3178,7 @@
                     <p class="tiny muted">${lastSeenLabel(p)}</p>
                   </div></div>
                   ${p.bio ? `<p class="small muted" style="margin:0">${esc(p.bio)}</p>` : ""}
-                  <div class="contacts">${contactsHtml(S.allPrivate.get(p.uid))}</div>
+                  <div class="contacts">${contactsHtml(S.allPrivate.get(p.uid))}${S.emails.get(p.uid) ? `<div class="contact-row"><div><small>Email</small><b>${esc(S.emails.get(p.uid))}</b></div><div class="actions"><button class="btn btn-ghost sm" data-action="copy" data-value="${esc(S.emails.get(p.uid))}">${esc(t("btn.copy"))}</button></div></div>` : ""}</div>
                   <div class="actions">
                     ${p.uid === S.uid ? `<span class="small muted">${esc(t("admin.you"))}</span>` : `
                     <button class="btn ${p.banned ? "btn-ok" : "btn-ghost"} grow" data-action="admin-ban" data-uid="${esc(p.uid)}" data-ban="${!p.banned}">${esc(p.banned ? t("btn.unban") : t("btn.banIcon"))}</button>
@@ -3593,6 +3623,11 @@
         "admin-filter": (el) => {
           S.adminFilter = el.dataset.value;
           $$("#admin-filter .chip").forEach((c) => c.classList.toggle("active", c === el));
+          renderAdmin();
+        },
+        "admin-sort": (el) => {
+          S.adminSort = el.dataset.value;
+          $$("#admin-sort .chip").forEach((c) => c.classList.toggle("active", c === el));
           renderAdmin();
         },
         "admin-ban": (el) => adminSetBan(el.dataset.uid, el.dataset.ban === "true", el.dataset.report),

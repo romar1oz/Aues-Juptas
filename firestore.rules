@@ -196,6 +196,15 @@ service cloud.firestore {
       allow delete: if isOwner(uid) || isAdmin();
     }
 
+    // ---------- Email: пишет только владелец, читают владелец и админ ----------
+    match /u_emails/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['email'])
+        && request.resource.data.email is string;
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
     // ---------- Список админов: свою запись видит только сам админ ----------
     match /u_admins/{uid} {
       allow read: if isOwner(uid);
