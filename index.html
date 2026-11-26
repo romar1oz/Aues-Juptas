@@ -2087,7 +2087,7 @@
               snap.forEach((d) => m.set(d.id, d.data()));
               S.presence = m;
               if (S.tab === "admin") renderAdmin();
-            }, listenError("admin-presence"))
+            }, (err) => console.warn("presence listener (rules not published yet?)", err?.code))
           );
         }
       }
