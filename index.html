@@ -1939,9 +1939,25 @@
       window.addEventListener("focus", touchPresence);
       document.addEventListener("visibilitychange", () => { if (!document.hidden) touchPresence(); });
 
+      // Повторяет запись: если прилетело permission-denied из-за устаревшего токена
+      // (email только что подтверждён), обновляет токен и пробует ещё раз.
+      async function withTokenRetry(fn) {
+        try {
+          return await fn();
+        } catch (err) {
+          if (String(err?.code || "").includes("permission-denied") && auth.currentUser) {
+            await auth.currentUser.getIdToken(true);
+            return await fn();
+          }
+          throw err;
+        }
+      }
+
       async function enterApp(user) {
         showScreen("screen-loading");
         $("#loading-text").textContent = t("loading.profiles");
+        // Свежий токен: чтобы правила сразу видели email_verified после подтверждения.
+        try { if (user && user.emailVerified) await user.getIdToken(true); } catch (e) {}
         try {
           const a = await getDoc(ref.admin(user.uid));
           S.isAdmin = a.exists();
@@ -2402,8 +2418,10 @@
           updatedAt: now,
         };
         try {
-          await setDoc(ref.profile(S.uid), profile);
-          await setDoc(ref.priv(S.uid), { telegram: f.telegram, instagram: f.instagram });
+          await withTokenRetry(async () => {
+            await setDoc(ref.profile(S.uid), profile);
+            await setDoc(ref.priv(S.uid), { telegram: f.telegram, instagram: f.instagram });
+          });
           toast(me ? t("toast.updated") : t("toast.welcome"));
           S.tab = me ? S.tab : "discover";
           closeForm();
