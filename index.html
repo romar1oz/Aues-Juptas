@@ -418,6 +418,24 @@
       .match-heart { width: 40px; height: 40px; margin: 0 -10px; z-index: 2; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-size: 18px; box-shadow: 0 0 24px var(--accent); }
       .text-center { text-align: center; }
 
+      .chat-modal { padding: 0; align-items: stretch; z-index: 45; }
+      .chat-box { max-width: 460px; width: 100%; height: 100dvh; max-height: none; border-radius: 0; padding: 0; gap: 0; margin: 0 auto; display: flex; flex-direction: column; }
+      @media (min-width: 520px) { .chat-box { height: calc(100dvh - 32px); max-height: 900px; border-radius: 24px; } }
+      .chat-head { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+      .chat-head-meta { flex: 1; min-width: 0; }
+      .chat-head-meta h4 { margin: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .chat-avatar { width: 38px; height: 38px; border-radius: 12px; object-fit: cover; background: var(--input); }
+      .chat-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; color: var(--muted); flex-shrink: 0; }
+      .chat-icon:hover { color: var(--text); background: var(--input); }
+      .chat-icon.danger { color: var(--danger); }
+      .chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+      .chat-row { display: flex; }
+      .chat-row.me { justify-content: flex-end; }
+      .chat-bubble { max-width: 76%; padding: 8px 12px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-break: break-word; white-space: pre-wrap; }
+      .chat-row.them .chat-bubble { background: var(--panel-2); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+      .chat-row.me .chat-bubble { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--on-accent); border-bottom-right-radius: 4px; }
+      .chat-input-row { display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); flex-shrink: 0; }
+      .chat-input-row .input { flex: 1; }
       .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-20px); z-index: 80; max-width: 90vw; padding: 10px 16px; border-radius: 99px; background: var(--elev); color: var(--text); border: 1px solid var(--accent); box-shadow: var(--shadow); font-size: 12.5px; font-weight: 600; text-align: center; opacity: 0; pointer-events: none; transition: all 0.25s; }
       .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -864,6 +882,27 @@
         </div>
       </div>
 
+      <!-- ================= ЧАТ (только между мэтчами) ================= -->
+      <div class="modal chat-modal" id="modal-chat" hidden>
+        <div class="modal-box chat-box">
+          <div class="chat-head">
+            <button class="chat-icon" data-action="close-chat" aria-label="back">←</button>
+            <img id="chat-photo" class="chat-avatar" alt="" />
+            <div class="chat-head-meta">
+              <h4 id="chat-name"></h4>
+              <p id="chat-sub" class="tiny muted" style="margin:0"></p>
+            </div>
+            <button class="chat-icon" data-action="chat-report" data-i18n-title="tip.report">⚡</button>
+            <button class="chat-icon danger" data-action="chat-block" data-i18n-title="chat.block">⛔</button>
+          </div>
+          <div class="chat-messages" id="chat-messages"></div>
+          <form class="chat-input-row" id="chat-form">
+            <input class="input" id="chat-input" maxlength="1000" autocomplete="off" data-i18n-ph="chat.ph" />
+            <button class="btn btn-primary" type="submit" data-i18n="chat.send"></button>
+          </form>
+        </div>
+      </div>
+
       <div class="toast" id="toast"></div>
     </div>
 
@@ -898,6 +937,7 @@
           posts: "u_posts",
           reports: "u_reports",
           admins: "u_admins",
+          chats: "u_chats",
         },
       };
 
@@ -1063,6 +1103,9 @@
           "likes.noneIn": "Пока новых симпатий нет",
           "likes.noneMatch": "Когда симпатия станет взаимной, здесь появятся контакты",
           "btn.reject": "Пропустить", "btn.accept": "Ответить взаимностью ♥", "btn.unmatch": "Отменить",
+          "btn.chat": "Написать", "chat.ph": "Сообщение…", "chat.send": "Отправить",
+          "chat.empty": "Пока нет сообщений. Напишите первым 👋", "chat.needMatch": "Чат доступен только при взаимном лайке",
+          "chat.block": "Заблокировать", "chat.blockTitle": "Заблокировать?", "chat.blockText": "Мэтч будет удалён, и человек больше не появится в ленте. Продолжить?", "chat.blockOk": "Заблокировать", "toast.blocked": "Пользователь заблокирован",
           "toast.skipped": "Пропущено",
 
           "profile.noneTitle": "Анкеты пока нет",
@@ -1246,6 +1289,9 @@
           "likes.noneIn": "Әзірге жаңа симпатия жоқ",
           "likes.noneMatch": "Симпатия өзара болғанда, байланыс осында пайда болады",
           "btn.reject": "Өткізу", "btn.accept": "Жауап лайк басу ♥", "btn.unmatch": "Болдырмау",
+          "btn.chat": "Жазу", "chat.ph": "Хабарлама…", "chat.send": "Жіберу",
+          "chat.empty": "Әзірге хабарлама жоқ. Бірінші боп жазыңыз 👋", "chat.needMatch": "Чат тек өзара лайк болғанда ашылады",
+          "chat.block": "Бұғаттау", "chat.blockTitle": "Бұғаттау керек пе?", "chat.blockText": "Мэтч жойылады және бұл адам лентада қайта көрінбейді. Жалғастырамыз ба?", "chat.blockOk": "Бұғаттау", "toast.blocked": "Пайдаланушы бұғатталды",
           "toast.skipped": "Өткізілді",
 
           "profile.noneTitle": "Әзірге анкета жоқ",
@@ -1429,6 +1475,9 @@
           "likes.noneIn": "No new likes yet",
           "likes.noneMatch": "When a like is mutual, contacts will appear here",
           "btn.reject": "Skip", "btn.accept": "Like back ♥", "btn.unmatch": "Unmatch",
+          "btn.chat": "Message", "chat.ph": "Message…", "chat.send": "Send",
+          "chat.empty": "No messages yet. Say hi first 👋", "chat.needMatch": "Chat opens only on a mutual like",
+          "chat.block": "Block", "chat.blockTitle": "Block this person?", "chat.blockText": "The match will be removed and they won\u2019t appear in your feed again. Continue?", "chat.blockOk": "Block", "toast.blocked": "User blocked",
           "toast.skipped": "Skipped",
 
           "profile.noneTitle": "No profile yet",
@@ -1854,6 +1903,8 @@
       });
 
       function teardown() {
+        if (S.chat && S.chat.unsub) { try { S.chat.unsub(); } catch (e) {} }
+        S.chat = null;
         S.unsub.forEach((fn) => { try { fn(); } catch (e) {} });
         S.unsub = [];
         Object.assign(S, {
@@ -1984,6 +2035,7 @@
           }
           S.knownMatches.forEach((uid) => { if (!now.has(uid)) S.contactsCache.delete(uid); });
         }
+        if (S.chat && !now.has(S.chat.uid)) closeChat();
         S.knownMatches = now;
         route();
       }
@@ -2806,6 +2858,7 @@
                   </div>
                   <button class="btn-link" data-action="unmatch" data-uid="${esc(p.uid)}">${esc(t("btn.unmatch"))}</button></div>
                   ${msg ? `<div class="bubble">💌 ${esc(msg)}</div>` : ""}
+                  <button class="btn btn-primary full" data-action="open-chat" data-uid="${esc(p.uid)}">💬 ${esc(t("btn.chat"))}</button>
                   <div class="contacts" data-contacts="${esc(p.uid)}"><p class="small muted" style="margin:0">${esc(t("contacts.loading"))}</p></div>
                 </div>`;
               })
@@ -2997,6 +3050,78 @@
       }
 
       /* =====================================================================
+         15b. ЧАТ МЕЖДУ МЭТЧАМИ
+      ===================================================================== */
+      S.chat = null;
+      const chatIdWith = (uid) => [S.uid, uid].sort().join("_");
+
+      function openChat(uid) {
+        const me = myProfile();
+        const p = S.profiles.get(uid);
+        if (!me || !p) return;
+        if (!matchUids().has(uid)) return toast(t("chat.needMatch"));
+        closeChat();
+        S.chat = { uid, id: chatIdWith(uid), msgs: [] };
+        $("#chat-photo").src = photoOf(p);
+        $("#chat-photo").dataset.fallback = p.name;
+        $("#chat-name").textContent = `${p.name}, ${p.age}`;
+        $("#chat-sub").textContent = `${courseLabel(p.course)} · ${p.group}`;
+        $("#chat-messages").innerHTML = "";
+        $("#chat-input").value = "";
+        openModal("modal-chat");
+        const qy = query(collection(db, C.chats, S.chat.id, "messages"), orderBy("ts", "asc"), limit(300));
+        S.chat.unsub = onSnapshot(qy, (snap) => {
+          const list = [];
+          snap.forEach((d) => list.push(d.data()));
+          if (S.chat) { S.chat.msgs = list; renderChatMessages(); }
+        }, (err) => toast(fbErr(err)));
+        setTimeout(() => $("#chat-input").focus(), 120);
+      }
+
+      function renderChatMessages() {
+        const box = $("#chat-messages");
+        if (!S.chat) return;
+        if (!S.chat.msgs.length) {
+          box.innerHTML = `<p class="small muted text-center" style="margin:auto">${esc(t("chat.empty"))}</p>`;
+          return;
+        }
+        box.innerHTML = S.chat.msgs
+          .map((m) => `<div class="chat-row ${m.senderUid === S.uid ? "me" : "them"}"><div class="chat-bubble">${esc(m.text)}</div></div>`)
+          .join("");
+        box.scrollTop = box.scrollHeight;
+      }
+
+      async function sendChatMessage() {
+        if (!S.chat) return;
+        const inp = $("#chat-input");
+        const text = inp.value.trim();
+        if (!text) return;
+        if (!matchUids().has(S.chat.uid)) return toast(t("chat.needMatch"));
+        inp.value = "";
+        try {
+          await addDoc(collection(db, C.chats, S.chat.id, "messages"), {
+            senderUid: S.uid,
+            text: text.slice(0, 1000),
+            ts: Date.now(),
+          });
+        } catch (e) {
+          inp.value = text;
+          toast(fbErr(e));
+        }
+      }
+
+      function closeChat() {
+        if (S.chat && S.chat.unsub) { try { S.chat.unsub(); } catch (e) {} }
+        S.chat = null;
+        closeModal("modal-chat");
+      }
+
+      document.getElementById("chat-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        sendChatMessage();
+      });
+
+      /* =====================================================================
          16. ЕДИНЫЙ ОБРАБОТЧИК КЛИКОВ
       ===================================================================== */
       const ACTIONS = {
@@ -3082,6 +3207,17 @@
             writeLike(el.dataset.uid, "skip").catch((e) => toast(fbErr(e)))
           ),
         "copy": (el) => copyText(el.dataset.value),
+        "open-chat": (el) => openChat(el.dataset.uid),
+        "close-chat": () => closeChat(),
+        "chat-report": () => { if (S.chat) openReport(S.chat.uid); },
+        "chat-block": () => {
+          if (!S.chat) return;
+          const uid = S.chat.uid;
+          askConfirm(t("chat.blockTitle"), t("chat.blockText"), t("chat.blockOk"), () => {
+            closeChat();
+            writeLike(uid, "skip").then(() => toast(t("toast.blocked"))).catch((e) => toast(fbErr(e)));
+          });
+        },
 
         "post-kind": (el) => { S.postKindFilter = el.dataset.value; renderPosts(); },
         "new-post": () => openNewPost(),
@@ -3148,7 +3284,7 @@
       });
 
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") $$(".modal").forEach((m) => (m.hidden = true));
+        if (e.key === "Escape") { if (S.chat) closeChat(); $$(".modal").forEach((m) => (m.hidden = true)); }
         const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || "");
         if (typing || S.tab !== "discover" || $("#screen-main").hidden || $$(".modal").some((m) => !m.hidden)) return;
         if (e.key === "ArrowLeft") swipe("like");
