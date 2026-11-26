@@ -424,6 +424,11 @@
       /* язык */
       .lang-btn { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; }
       .lang-seg { width: 100%; }
+      .or-div { display: flex; align-items: center; gap: 10px; width: 100%; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 2px 0; }
+      .or-div::before, .or-div::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+      .email-form { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+      .auth-links { display: flex; justify-content: space-between; gap: 10px; width: 100%; }
+      .auth-links .btn-link { padding: 4px 0; }
       .lang-seg button { font-size: 12px; }
     </style>
   </head>
@@ -477,6 +482,18 @@
             <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
             <span data-i18n="login.google"></span>
           </button>
+
+          <div class="or-div"><span data-i18n="auth.or"></span></div>
+          <form id="email-form" class="email-form" novalidate>
+            <input class="input" id="login-email" type="email" autocomplete="email" data-i18n-ph="auth.emailPh" />
+            <input class="input" id="login-pass" type="password" autocomplete="current-password" data-i18n-ph="auth.passPh" />
+            <button type="submit" class="btn btn-primary full" id="btn-email-submit" data-i18n="auth.login"></button>
+          </form>
+          <div class="auth-links">
+            <button type="button" class="btn-link" data-action="email-reset" data-i18n="auth.forgot"></button>
+            <button type="button" class="btn-link" id="auth-toggle" data-action="email-toggle" data-i18n="auth.toRegister"></button>
+          </div>
+
           <div class="seg lang-seg" id="login-lang">
             <button type="button" data-action="set-lang" data-value="kk">Қазақша</button>
             <button type="button" data-action="set-lang" data-value="ru">Русский</button>
@@ -600,6 +617,17 @@
           <h2 class="display" style="font-size: 19px; margin: 10px 0 6px" data-i18n="banned.title"></h2>
           <p class="muted small" style="max-width: 290px; line-height: 1.5" data-i18n="banned.text"></p>
           <button class="btn btn-ghost" data-action="logout" style="margin-top: 12px" data-i18n="btn.logout"></button>
+        </section>
+
+        <!-- ================= ЭКРАН ПОДТВЕРЖДЕНИЯ EMAIL ================= -->
+        <section id="screen-verify" class="screen center" hidden>
+          <div style="font-size: 44px">✉️</div>
+          <h2 class="display" style="font-size: 19px; margin: 10px 0 6px" data-i18n="verify.title"></h2>
+          <p class="small" style="color: var(--accent); margin: 0 0 8px" id="verify-email"></p>
+          <p class="muted small" style="max-width: 300px; line-height: 1.5; margin: 0 0 16px" data-i18n="verify.text"></p>
+          <button class="btn btn-primary" data-action="verify-check" style="min-width: 220px" data-i18n="verify.check"></button>
+          <button class="btn btn-ghost" data-action="verify-resend" style="min-width: 220px; margin-top: 8px" data-i18n="verify.resend"></button>
+          <button class="btn-link" data-action="logout" style="margin-top: 10px" data-i18n="btn.logout"></button>
         </section>
 
         <!-- ================= ОСНОВНОЕ ПРИЛОЖЕНИЕ ================= -->
@@ -844,6 +872,8 @@
       import {
         getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
         getRedirectResult, onAuthStateChanged, signOut,
+        createUserWithEmailAndPassword, signInWithEmailAndPassword,
+        sendEmailVerification, sendPasswordResetEmail,
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
       import {
         getFirestore, collection, doc, setDoc, getDoc, deleteDoc, updateDoc, addDoc,
@@ -907,6 +937,27 @@
           "login.inapp": "Похоже, сайт открыт внутри Instagram, Telegram или TikTok. Google не разрешает вход в таких окнах: нажмите <b>⋯</b> и выберите <b>«Открыть в браузере»</b>.",
           "login.google": "Войти через Google",
           "footer.rights": "© 2026 JUPTAS. Все права защищены.",
+          "auth.or": "или",
+          "auth.emailPh": "Email",
+          "auth.passPh": "Пароль (мин. 6 символов)",
+          "auth.login": "Войти",
+          "auth.register": "Зарегистрироваться",
+          "auth.forgot": "Забыли пароль?",
+          "auth.toRegister": "Нет аккаунта? Регистрация",
+          "auth.toLogin": "Уже есть аккаунт? Войти",
+          "auth.badEmail": "Введите корректный email",
+          "auth.weakPw": "Пароль минимум 6 символов",
+          "auth.wrongCreds": "Неверный email или пароль",
+          "auth.inUse": "Этот email уже зарегистрирован. Войдите.",
+          "auth.tooMany": "Слишком много попыток. Попробуйте позже.",
+          "auth.enterEmail": "Сначала введите email выше",
+          "auth.resetSent": "Письмо для сброса пароля отправлено на email",
+          "verify.title": "Подтвердите почту",
+          "verify.text": "Мы отправили письмо со ссылкой. Откройте его, подтвердите email, затем нажмите «Я подтвердил». Проверьте папку «Спам».",
+          "verify.check": "Я подтвердил, продолжить",
+          "verify.resend": "Отправить письмо снова",
+          "verify.sent": "Письмо отправлено",
+          "verify.notyet": "Почта ещё не подтверждена. Откройте письмо.",
           "login.fine": "Только 18+. Email нужен лишь для входа и никому не показывается. Telegram и Instagram видны только при взаимной симпатии и администратору для модерации.",
 
           "form.create": "Создание анкеты", "form.edit": "Редактирование анкеты",
@@ -1069,6 +1120,27 @@
           "login.inapp": "Сайт Instagram, Telegram немесе TikTok ішінде ашылған сияқты. Google мұндай терезелерде кіруге рұқсат бермейді: <b>⋯</b> басып, <b>«Браузерде ашу»</b> таңдаңыз.",
           "login.google": "Google арқылы кіру",
           "footer.rights": "© 2026 JUPTAS. Барлық құқық қорғалған.",
+          "auth.or": "немесе",
+          "auth.emailPh": "Email",
+          "auth.passPh": "Пароль (кемінде 6 таңба)",
+          "auth.login": "Кіру",
+          "auth.register": "Тіркелу",
+          "auth.forgot": "Парольді ұмыттыңыз ба?",
+          "auth.toRegister": "Аккаунт жоқ па? Тіркелу",
+          "auth.toLogin": "Аккаунт бар ма? Кіру",
+          "auth.badEmail": "Дұрыс email енгізіңіз",
+          "auth.weakPw": "Пароль кемінде 6 таңба",
+          "auth.wrongCreds": "Email немесе пароль қате",
+          "auth.inUse": "Бұл email тіркелген. Кіріңіз.",
+          "auth.tooMany": "Тым көп әрекет. Кейінірек көріңіз.",
+          "auth.enterEmail": "Алдымен жоғарыда email енгізіңіз",
+          "auth.resetSent": "Парольді қалпына келтіру сілтемесі email-ге жіберілді",
+          "verify.title": "Поштаны растаңыз",
+          "verify.text": "Біз сілтемесі бар хат жібердік. Оны ашып, email-ді растаңыз, сосын «Растадым» дегенді басыңыз. «Спам» папкасын да тексеріңіз.",
+          "verify.check": "Растадым, жалғастыру",
+          "verify.resend": "Хатты қайта жіберу",
+          "verify.sent": "Хат жіберілді",
+          "verify.notyet": "Пошта әлі расталмаған. Хатты ашыңыз.",
           "login.fine": "Тек 18+. Email тек кіру үшін қажет және ешкімге көрсетілмейді. Telegram мен Instagram тек өзара симпатия болғанда және модерация үшін әкімшіге көрінеді.",
 
           "form.create": "Анкета құру", "form.edit": "Анкетаны өңдеу",
@@ -1231,6 +1303,27 @@
           "login.inapp": "Looks like this page is open inside Instagram, Telegram or TikTok. Google blocks sign-in there: tap <b>⋯</b> and choose <b>“Open in browser”</b>.",
           "login.google": "Sign in with Google",
           "footer.rights": "© 2026 JUPTAS. All rights reserved.",
+          "auth.or": "or",
+          "auth.emailPh": "Email",
+          "auth.passPh": "Password (min. 6 characters)",
+          "auth.login": "Sign in",
+          "auth.register": "Sign up",
+          "auth.forgot": "Forgot password?",
+          "auth.toRegister": "No account? Sign up",
+          "auth.toLogin": "Have an account? Sign in",
+          "auth.badEmail": "Enter a valid email",
+          "auth.weakPw": "Password must be at least 6 characters",
+          "auth.wrongCreds": "Wrong email or password",
+          "auth.inUse": "This email is already registered. Sign in.",
+          "auth.tooMany": "Too many attempts. Try again later.",
+          "auth.enterEmail": "Enter your email above first",
+          "auth.resetSent": "A password reset link was sent to your email",
+          "verify.title": "Verify your email",
+          "verify.text": "We sent you a link. Open it, confirm your email, then tap \u201cI verified\u201d. Check your Spam folder too.",
+          "verify.check": "I verified, continue",
+          "verify.resend": "Resend email",
+          "verify.sent": "Email sent",
+          "verify.notyet": "Email not verified yet. Open the link.",
           "login.fine": "18+ only. Your email is used only to sign in and is never shown. Telegram and Instagram are shown only on a mutual match and to the admin for moderation.",
 
           "form.create": "Create profile", "form.edit": "Edit profile",
@@ -1412,6 +1505,7 @@
         $("#login-sub").textContent = t("login.sub", { uni: CONFIG.UNIVERSITY });
         $("#btn-lang").textContent = LANG_SHORT[LANG];
         $$("#login-lang button").forEach((b) => b.classList.toggle("active", b.dataset.value === LANG));
+        if (typeof S !== "undefined" && S.authMode) syncAuthMode();
       }
 
       function setLang(lang) {
@@ -1543,6 +1637,13 @@
         if (code.includes("unauthorized-domain")) return t("auth.domain", { host });
         if (code.includes("operation-not-allowed")) return t("auth.provider");
         if (code.includes("network-request-failed")) return t("err.offline");
+        if (code.includes("email-already-in-use")) return t("auth.inUse");
+        if (code.includes("invalid-email")) return t("auth.badEmail");
+        if (code.includes("weak-password")) return t("auth.weakPw");
+        if (code.includes("wrong-password") || code.includes("user-not-found") || code.includes("invalid-credential") || code.includes("invalid-login"))
+          return t("auth.wrongCreds");
+        if (code.includes("too-many-requests")) return t("auth.tooMany");
+        if (code.includes("user-disabled")) return t("banned.title");
         return t("auth.generic", { x: code || err?.message });
       }
 
@@ -1651,6 +1752,11 @@
       const isInApp = /Instagram|FBAN|FBAV|FB_IAB|Line\/|TikTok|musical_ly|Bytedance|Snapchat/i.test(navigator.userAgent);
       $("#inapp-warning").hidden = !isInApp;
 
+      document.getElementById("email-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        emailSubmit();
+      });
+
       async function login() {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
@@ -1668,14 +1774,58 @@
 
       getRedirectResult(auth).catch((e) => toast(authErr(e)));
 
-      onAuthStateChanged(auth, async (user) => {
-        teardown();
-        S.user = user;
-        S.uid = user ? user.uid : null;
-        if (!user) {
-          showScreen("screen-login");
-          return;
+      // --- Вход / регистрация по email и паролю ---
+      S.authMode = "login";
+      const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+      function syncAuthMode() {
+        const reg = S.authMode === "register";
+        const sub = $("#btn-email-submit");
+        const tog = $("#auth-toggle");
+        if (sub) sub.textContent = t(reg ? "auth.register" : "auth.login");
+        if (tog) tog.textContent = t(reg ? "auth.toLogin" : "auth.toRegister");
+        const pw = $("#login-pass");
+        if (pw) pw.autocomplete = reg ? "new-password" : "current-password";
+      }
+
+      async function emailSubmit() {
+        const email = $("#login-email").value.trim();
+        const pw = $("#login-pass").value;
+        if (!emailRe.test(email)) return toast(t("auth.badEmail"));
+        if (pw.length < 6) return toast(t("auth.weakPw"));
+        const btn = $("#btn-email-submit");
+        btn.disabled = true;
+        try {
+          if (S.authMode === "register") {
+            const cred = await createUserWithEmailAndPassword(auth, email, pw);
+            try { await sendEmailVerification(cred.user); } catch (e) {}
+          } else {
+            await signInWithEmailAndPassword(auth, email, pw);
+          }
+        } catch (e) {
+          toast(authErr(e));
+        } finally {
+          btn.disabled = false;
         }
+      }
+
+      async function resetPassword() {
+        const email = $("#login-email").value.trim();
+        if (!emailRe.test(email)) return toast(t("auth.enterEmail"));
+        try {
+          await sendPasswordResetEmail(auth, email);
+          toast(t("auth.resetSent"));
+        } catch (e) {
+          toast(authErr(e));
+        }
+      }
+
+      function showVerify(user) {
+        $("#verify-email").textContent = user.email || "";
+        showScreen("screen-verify");
+      }
+
+      async function enterApp(user) {
         showScreen("screen-loading");
         $("#loading-text").textContent = t("loading.profiles");
         try {
@@ -1685,6 +1835,22 @@
           S.isAdmin = false;
         }
         startListeners();
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        teardown();
+        S.user = user;
+        S.uid = user ? user.uid : null;
+        if (!user) {
+          showScreen("screen-login");
+          return;
+        }
+        // email/пароль не подтверждён — сначала почту (Google всегда verified)
+        if (!user.emailVerified) {
+          showVerify(user);
+          return;
+        }
+        enterApp(user);
       });
 
       function teardown() {
@@ -1826,7 +1992,7 @@
          8. МАРШРУТИЗАЦИЯ ЭКРАНОВ
       ===================================================================== */
       function showScreen(id) {
-        ["screen-loading", "screen-login", "screen-form", "screen-banned", "screen-main"].forEach((x) => {
+        ["screen-loading", "screen-login", "screen-verify", "screen-form", "screen-banned", "screen-main"].forEach((x) => {
           $("#" + x).hidden = x !== id;
         });
         $("#btn-filters").hidden = !(id === "screen-main" && S.tab === "discover");
@@ -2835,6 +3001,29 @@
       ===================================================================== */
       const ACTIONS = {
         "login": () => login(),
+        "email-toggle": () => {
+          S.authMode = S.authMode === "register" ? "login" : "register";
+          syncAuthMode();
+        },
+        "email-reset": () => resetPassword(),
+        "verify-resend": async () => {
+          try {
+            if (auth.currentUser) await sendEmailVerification(auth.currentUser);
+            toast(t("verify.sent"));
+          } catch (e) { toast(authErr(e)); }
+        },
+        "verify-check": async () => {
+          try {
+            await auth.currentUser.reload();
+            if (auth.currentUser.emailVerified) {
+              await auth.currentUser.getIdToken(true);
+              S.user = auth.currentUser;
+              enterApp(auth.currentUser);
+            } else {
+              toast(t("verify.notyet"));
+            }
+          } catch (e) { toast(authErr(e)); }
+        },
         "logout": () => signOut(auth),
         "toggle-theme": () => setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"),
         "cycle-lang": () => setLang(LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]),
